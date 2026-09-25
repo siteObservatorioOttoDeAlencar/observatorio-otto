@@ -1,0 +1,66 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: observatorio-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-observatorio}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-observatorio}
+      POSTGRES_DB: ${POSTGRES_DB:-observatorio}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-observatorio}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  strapi:
+    build:
+      context: ./strapi
+    container_name: observatorio-strapi
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_CLIENT: postgres
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: ${POSTGRES_DB:-observatorio}
+      DATABASE_USERNAME: ${POSTGRES_USER:-observatorio}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-observatorio}
+      DATABASE_SCHEMA: strapi
+      JWT_SECRET: ${STRAPI_JWT_SECRET:-troque_este_segredo}
+      ADMIN_JWT_SECRET: ${STRAPI_ADMIN_JWT_SECRET:-troque_este_segredo_admin}
+      APP_KEYS: ${STRAPI_APP_KEYS:-chave1,chave2,chave3,chave4}
+      API_TOKEN_SALT: ${STRAPI_API_TOKEN_SALT:-troque_este_salt}
+    ports:
+      - "1337:1337"
+    volumes:
+      - ./strapi:/app
+      - strapi_uploads:/app/public/uploads
+
+  api-python:
+    build:
+      context: ./api_python
+    container_name: observatorio-api-python
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-observatorio}:${POSTGRES_PASSWORD:-observatorio}@postgres:5432/${POSTGRES_DB:-observatorio}
+      STRAPI_JWT_SECRET: ${STRAPI_JWT_SECRET:-troque_este_segredo}
+      STRAPI_URL: http://strapi:1337
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./api_python:/app
+volumes:
+  postgres_data:
+  strapi_uploads:
