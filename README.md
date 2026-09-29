@@ -1,70 +1,102 @@
 # Backend — Observatório Digital Otto de Alencar
 
-Setup local do backend: Strapi (CMS) + API própria (FastAPI) + Postgres, orquestrados via Docker Compose.
+Backend do projeto, composto pelo CMS Strapi, uma API em FastAPI e um banco PostgreSQL. Os três serviços são executados localmente com Docker Compose.
 
 ## Pré-requisitos
 
-- Docker e Docker Compose instalados
 - Git
+- Docker Desktop (incluindo Docker Compose)
+- Node.js 20 ou compatível com a versão definida em `strapi/app/package.json` (necessário apenas para gerar segredos)
 
-## Passo a passo — primeira vez
+## Configuração inicial
 
-1. **Copie o arquivo de variáveis de ambiente:**
-   ```bash
-   cp .env.example .env
+1. Clone o repositório e entre na pasta do projeto.
+
+2. Crie um arquivo `.env` na raiz do projeto com estas variáveis:
+
+   ```dotenv
+   POSTGRES_USER=observatorio
+   POSTGRES_PASSWORD=defina_uma_senha
+   POSTGRES_DB=observatorio
+
+   STRAPI_JWT_SECRET=gere_um_segredo
+   STRAPI_ADMIN_JWT_SECRET=gere_outro_segredo
+   STRAPI_APP_KEYS=chave1,chave2,chave3,chave4
+   STRAPI_API_TOKEN_SALT=gere_uma_salt
+
+   CLOUDINARY_NAME=
+   CLOUDINARY_KEY=
+   CLOUDINARY_SECRET=
    ```
-   Edite o `.env` e troque os segredos (`STRAPI_JWT_SECRET`, senhas, etc.) por valores gerados de verdade:
+
+   Substitua os valores de exemplo por valores próprios. Gere segredos fortes e diferentes para cada variável de segredo; `STRAPI_APP_KEYS` deve conter quatro valores separados por vírgulas. Por exemplo, este comando gera um valor aleatório:
+
    ```bash
-   node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
    ```
-   Gere um valor diferente para cada segredo do `.env`.
 
-2. **Suba os containers:**
+   Os dados do Cloudinary são usados pelo Strapi para upload de mídia. Preencha-os com as credenciais da sua conta para usar esse recurso. O `.env` é ignorado pelo Git; não o versione nem compartilhe seus segredos.
+
+3. Construa a imagem do Strapi e instale as dependências Node dentro do container:
+
    ```bash
-   docker compose up --build
+   docker compose build
+   docker compose run --rm --no-deps strapi npm ci
    ```
-   Na primeira execução, o Strapi vai se instalar sozinho dentro do container (demora alguns minutos). Acompanhe o log até aparecer que o servidor subiu.
 
-3. **Acesse o painel admin do Strapi:**
-   - http://localhost:1337/admin
-   - Crie o primeiro usuário administrador (isso só acontece uma vez)
+   Execute novamente `npm ci` quando as dependências em `strapi/app/package.json` ou `strapi/app/package-lock.json` forem alteradas.
 
-4. **Acesse a documentação interativa da API própria:**
-   - http://localhost:8000/docs
-   - O FastAPI gera essa tela automaticamente — dá pra testar os endpoints direto por ali
+## Executar o projeto
 
-## Primeiros passos técnicos depois do setup
+Na raiz do repositório, inicie os serviços:
 
-1. No painel do Strapi, criar os primeiros *content-types*:
-   - `Noticia` (título, texto, imagem de capa, data)
-   - `Evento` (título, descrição, data, local, imagem)
-   - `Material Educativo` (título, arquivo, descrição)
-   - `Item de Galeria` (imagem, legenda, data)
-
-2. Em `Settings → Roles` no Strapi, configurar as permissões (quem publica, quem edita).
-
-3. Testar o endpoint `/observar-hoje` da API própria — na primeira chamada ele baixa o arquivo de efemérides (`de421.bsp`, ~17MB), pode demorar um pouco. Nas chamadas seguintes já fica em cache.
-
-4. Validar a integração de autenticação: gerar um JWT fazendo login no Strapi, e usar esse token para chamar um endpoint protegido da API própria (`/registros-observacao`) — confirma que os dois serviços compartilham o mesmo segredo corretamente.
-
-## Estrutura do projeto
-
+```bash
+docker compose up --build
 ```
-observatorio-otto/
-├── docker-compose.yml
-├── .env.example
-├── strapi/              → CMS (instalado automaticamente no primeiro build)
+
+Na primeira inicialização, o Strapi pode levar alguns minutos para iniciar enquanto configura o ambiente. Para acompanhar os logs:
+
+```bash
+docker compose logs -f
+```
+
+Os serviços ficam disponíveis em:
+
+| Serviço | Endereço |
+| --- | --- |
+| Painel administrativo do Strapi | http://localhost:1337/admin |
+| API do Strapi | http://localhost:1337 |
+| API FastAPI | http://localhost:8000 |
+| Documentação interativa FastAPI | http://localhost:8000/docs |
+| Verificação da API FastAPI | http://localhost:8000/health |
+| PostgreSQL | `localhost:5432` |
+
+No primeiro acesso a `/admin`, crie a conta de administrador do Strapi.
+
+### Endpoints da API FastAPI
+
+- `GET /health`: verifica se a API está respondendo.
+- `GET /observar-hoje`: retorna informações astronômicas para a localização configurada. Na primeira chamada, o Skyfield pode baixar o arquivo de efemérides `de421.bsp`.
+- `POST /registros-observacao`: exemplo de rota protegida por JWT do Strapi; a gravação do registro ainda não está implementada.
+
+## Encerrar e persistência dos dados
+
+Para parar os containers:
+
+```bash
+docker compose down
+```
+
+Os dados do PostgreSQL e os uploads do Strapi ficam em volumes Docker e são preservados ao parar os serviços. Para apagá-los também, use `docker compose down -v`; isso exclui os dados persistidos.
+
+## Estrutura
+
+```text
+.
+├── api_python/       # API FastAPI, autenticação JWT e lógica astronômica
+├── strapi/
+│   ├── app/          # Aplicação Strapi e seus content-types
 │   └── Dockerfile
-└── api-propria/         → API própria em FastAPI
-    ├── Dockerfile
-    ├── requirements.txt
-    ├── main.py           → rotas
-    ├── auth.py           → validação do JWT do Strapi
-    └── astronomia.py     → lógica do recurso "O que observar no céu?"
+├── docker-compose.yml
+└── README.md
 ```
-
-## Próximos passos (fora do escopo deste starter)
-
-- Configurar deploy: Strapi → Render, API própria → Fly.io, banco → Supabase (ver `ARCHITECTURE.md` e o PRD do projeto)
-- Configurar o cron job de ping para mitigar o "sleep" do free tier
-- Definir a estrutura de dados real de Registros de Observações Astronômicas junto com os coordenadores
