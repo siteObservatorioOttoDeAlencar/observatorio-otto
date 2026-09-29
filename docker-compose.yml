@@ -39,11 +39,14 @@ services:
       ADMIN_JWT_SECRET: ${STRAPI_ADMIN_JWT_SECRET:-troque_este_segredo_admin}
       APP_KEYS: ${STRAPI_APP_KEYS:-chave1,chave2,chave3,chave4}
       API_TOKEN_SALT: ${STRAPI_API_TOKEN_SALT:-troque_este_salt}
+      CLOUDINARY_NAME: ${CLOUDINARY_NAME}
+      CLOUDINARY_KEY: ${CLOUDINARY_KEY}
+      CLOUDINARY_SECRET: ${CLOUDINARY_SECRET}
     ports:
       - "1337:1337"
     volumes:
-      - ./strapi:/app
-      - strapi_uploads:/app/public/uploads
+       - ./strapi/app:/app
+       - strapi_uploads:/app/public/uploads
 
   api-python:
     build:

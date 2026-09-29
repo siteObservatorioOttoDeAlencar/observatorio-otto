@@ -4,3 +4,14 @@ __pycache__/
 .env
 node_modules/
 de421.bsp
+strapi/app/node_modules/
+strapi/app/.cache/
+*strapi-log.txt
+# Logs
+*.log
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+strapi/app/src/admin/webpack.config.example.js
