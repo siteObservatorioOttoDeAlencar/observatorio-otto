@@ -1,0 +1,157 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   1. CSS VARIABLES & THEME TOKENS
+   ========================================================================== */
+:root {
+  /* Dark Mode Ergonômico & Confortável (Inspirado em Linear, Raycast e GitHub Dark) */
+  --space-bg: #0E131F;             /* Fundo grafite ardósia profundo, longe do #000000 e #020617 agressivo */
+  --space-surface-1: #151D2E;      /* Superfície primária suave, contraste macio com o fundo */
+  --space-surface-2: #1D283E;      /* Superfície secundária e cartões de apoio */
+  --space-border: #2A3854;         /* Borda nítida porém sutil, sem linhas brancas estouradas */
+  --space-border-subtle: rgba(255, 255, 255, 0.06); /* Borda translúcida suave */
+  --space-text-main: #ECEFF4;       /* Texto principal esbranquiçado suave (off-white), longe do #FFFFFF puro */
+  --space-text-muted: #94A3B8;      /* Texto de apoio legível e suave, excelente contraste sem ofuscar */
+
+  /* Cores de Acento Astronômicas Suaves (Não fluorescentes) */
+  --nebula-cyan: #38BDF8;          /* Ciano celeste equilibrado */
+  --nebula-cyan-dim: #0284C7;      /* Ciano atenuado para botões e borders */
+  --stellar-amber: #F59E0B;        /* Âmbar estelar natural */
+  --lunar-silver: #E2E8F0;         /* Branco lunar quente e macio */
+  --aurora-green: #34D399;         /* Verde aurora natural */
+  --crimson-deep: #F87171;         /* Vermelho coral atenuado */
+
+  /* Glassmorphism Refinado & Calmo */
+  --glass-bg: rgba(21, 29, 46, 0.92); /* Superfície sólida quase opaca, sem efeito leitoso */
+  --glass-border: rgba(255, 255, 255, 0.07);
+  --glass-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.35);
+  --glass-blur: 8px;
+
+  /* Scrollbar Ergonômica */
+  --scrollbar-track: #0E131F;
+  --scrollbar-thumb: #2A3854;
+  --scrollbar-thumb-hover: #38BDF8;
+}
+
+/* Suporte preparado para Light Mode (Observatório Diurno / Modo Claro) */
+.light {
+  --space-bg: #F8FAFC;
+  --space-surface-1: #FFFFFF;
+  --space-surface-2: #F1F5F9;
+  --space-border: #CBD5E1;
+  --space-text-muted: #64748B;
+
+  --nebula-cyan: #0284C7;
+  --nebula-cyan-dim: #0369A1;
+  --stellar-amber: #D97706;
+  --lunar-silver: #0F172A;
+  --aurora-green: #059669;
+  --crimson-deep: #DC2626;
+
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(2, 132, 199, 0.18);
+  --glass-shadow: 0 8px 32px 0 rgba(15, 23, 42, 0.08);
+  --glass-blur: 12px;
+
+  --scrollbar-track: #F1F5F9;
+  --scrollbar-thumb: #CBD5E1;
+  --scrollbar-thumb-hover: #0284C7;
+}
+
+/* ==========================================================================
+   2. RESET MODERNO & CONFIGURAÇÕES GLOBAIS
+   ========================================================================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+  scroll-behavior: smooth;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html.light {
+  color-scheme: light;
+}
+
+body {
+  background-color: var(--space-bg);
+  color: var(--space-text-main);
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* ==========================================================================
+   3. SCROLLBAR CUSTOMIZADA CÓSMICA
+   ========================================================================== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* ==========================================================================
+   4. CLASSES UTILITÁRIAS PRÓPRIAS & GLASSMORPHISM
+   ========================================================================== */
+@layer utilities {
+  .cosmic-glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+  }
+
+  .cosmic-glass-interactive {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .cosmic-glass-interactive:hover {
+    border-color: rgba(56, 189, 248, 0.35);
+    transform: translateY(-2px);
+  }
+
+  .cosmic-glow {
+    filter: drop-shadow(0 0 4px rgba(56, 189, 248, 0.25));
+  }
+
+  .cosmic-glow-amber {
+    filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.25));
+  }
+
+  .text-gradient-cyan {
+    background: linear-gradient(135deg, #38BDF8 0%, #E2E8F0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .text-gradient-amber {
+    background: linear-gradient(135deg, #F59E0B 0%, #FDE68A 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
