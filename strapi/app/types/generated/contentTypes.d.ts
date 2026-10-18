@@ -362,6 +362,86 @@ export interface AdminUser extends Schema.CollectionType {
   };
 }
 
+export interface ApiCategoriaEventoCategoriaEvento
+  extends Schema.CollectionType {
+  collectionName: 'categoria_eventos';
+  info: {
+    displayName: 'categoriaEvento';
+    pluralName: 'categoria-eventos';
+    singularName: 'categoria-evento';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'api::categoria-evento.categoria-evento',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    Descricao: Attribute.Text;
+    eventos: Attribute.Relation<
+      'api::categoria-evento.categoria-evento',
+      'manyToMany',
+      'api::evento.evento'
+    >;
+    Nome: Attribute.String;
+    Ordem: Attribute.Integer;
+    publishedAt: Attribute.DateTime;
+    Slug: Attribute.UID<'api::categoria-evento.categoria-evento', 'Nome'>;
+    updatedAt: Attribute.DateTime;
+    updatedBy: Attribute.Relation<
+      'api::categoria-evento.categoria-evento',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+  };
+}
+
+export interface ApiEventoEvento extends Schema.CollectionType {
+  collectionName: 'eventos';
+  info: {
+    description: '';
+    displayName: 'Evento';
+    pluralName: 'eventos';
+    singularName: 'evento';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    categoria_eventos: Attribute.Relation<
+      'api::evento.evento',
+      'manyToMany',
+      'api::categoria-evento.categoria-evento'
+    >;
+    createdAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'api::evento.evento',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    Data_hora: Attribute.DateTime;
+    Descricao: Attribute.Blocks;
+    Imagem: Attribute.Media<'images' | 'files' | 'videos' | 'audios', true>;
+    Inscricoes_abertas: Attribute.Boolean;
+    Local: Attribute.String;
+    publishedAt: Attribute.DateTime;
+    Titulo: Attribute.String;
+    updatedAt: Attribute.DateTime;
+    updatedBy: Attribute.Relation<
+      'api::evento.evento',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+  };
+}
+
 export interface ApiInicioInicio extends Schema.SingleType {
   collectionName: 'inicios';
   info: {
@@ -833,6 +913,8 @@ declare module '@strapi/types' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
+      'api::categoria-evento.categoria-evento': ApiCategoriaEventoCategoriaEvento;
+      'api::evento.evento': ApiEventoEvento;
       'api::inicio.inicio': ApiInicioInicio;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;

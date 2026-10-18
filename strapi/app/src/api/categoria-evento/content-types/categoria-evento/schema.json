@@ -1,0 +1,34 @@
+{
+  "kind": "collectionType",
+  "collectionName": "categoria_eventos",
+  "info": {
+    "singularName": "categoria-evento",
+    "pluralName": "categoria-eventos",
+    "displayName": "categoriaEvento"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Nome": {
+      "type": "string"
+    },
+    "Slug": {
+      "type": "uid",
+      "targetField": "Nome"
+    },
+    "Ordem": {
+      "type": "integer"
+    },
+    "Descricao": {
+      "type": "text"
+    },
+    "eventos": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::evento.evento",
+      "mappedBy": "categoria_eventos"
+    }
+  }
+}
