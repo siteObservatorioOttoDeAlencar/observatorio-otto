@@ -2,6 +2,9 @@ import menuLogo from './extensions/logo-uece.png';
 
 export default {
   config: {
+    head: {
+      favicon: menuLogo,
+    },
     menu: {
       logo: menuLogo,
     },
