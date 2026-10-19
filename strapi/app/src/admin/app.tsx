@@ -1,5 +1,10 @@
+import menuLogo from './extensions/logo-uece.png';
+
 export default {
   config: {
+    menu: {
+      logo: menuLogo,
+    },
     locales: [
       // 'ar',
       // 'fr',
