@@ -40,24 +40,24 @@ Backend do projeto, composto pelo CMS Strapi, uma API em FastAPI e um banco Post
 3. Construa a imagem do Strapi e instale as dependências Node dentro do container:
 
    ```bash
-   docker compose build
-   docker compose run --rm --no-deps strapi npm ci
+   docker compose --env-file .env -f backend/docker-compose.yml build
+   docker compose --env-file .env -f backend/docker-compose.yml run --rm --no-deps strapi npm ci
    ```
 
-   Execute novamente `npm ci` quando as dependências em `strapi/app/package.json` ou `strapi/app/package-lock.json` forem alteradas.
+   Execute novamente `npm ci` quando as dependências em `backend/strapi/app/package.json` ou `backend/strapi/app/package-lock.json` forem alteradas.
 
 ## Executar o projeto
 
 Na raiz do repositório, inicie os serviços:
 
 ```bash
-docker compose up --build
+docker compose --env-file .env -f backend/docker-compose.yml up --build
 ```
 
 Na primeira inicialização, o Strapi pode levar alguns minutos para iniciar enquanto configura o ambiente. Para acompanhar os logs:
 
 ```bash
-docker compose logs -f
+docker compose --env-file .env -f backend/docker-compose.yml logs -f
 ```
 
 Os serviços ficam disponíveis em:
@@ -84,19 +84,21 @@ No primeiro acesso a `/admin`, crie a conta de administrador do Strapi.
 Para parar os containers:
 
 ```bash
-docker compose down
+docker compose --env-file .env -f backend/docker-compose.yml down
 ```
 
-Os dados do PostgreSQL e os uploads do Strapi ficam em volumes Docker e são preservados ao parar os serviços. Para apagá-los também, use `docker compose down -v`; isso exclui os dados persistidos.
+Os dados do PostgreSQL e os uploads do Strapi ficam em volumes Docker e são preservados ao parar os serviços. Para apagá-los também, use `docker compose --env-file .env -f backend/docker-compose.yml down -v`; isso exclui os dados persistidos.
 
 ## Estrutura
 
 ```text
 .
-├── api_python/       # API FastAPI, autenticação JWT e lógica astronômica
-├── strapi/
-│   ├── app/          # Aplicação Strapi e seus content-types
-│   └── Dockerfile
-├── docker-compose.yml
+├── backend/
+│   ├── api_python/   # API FastAPI, autenticação JWT e lógica astronômica
+│   ├── strapi/
+│   │   ├── app/      # Aplicação Strapi e seus content-types
+│   │   └── Dockerfile
+│   └── docker-compose.yml
+├── frontend/         # Aplicação Next.js
 └── README.md
 ```

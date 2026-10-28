@@ -51,12 +51,18 @@ Aqui você não precisa ser especialista para entender. Cada ferramenta tem um p
 
 ---
 
-## Estrutura de Pastas
+## Executar o backend com Docker
+
+Configure o arquivo `.env` na raiz seguindo as instruções de [backend/README.md](backend/README.md). Na raiz do repositório, inicie os serviços:
+
+```bash
+docker compose --env-file .env -f backend/docker-compose.yml up --build
+```
 
 Na primeira inicialização, o Strapi pode levar alguns minutos para iniciar enquanto configura o ambiente. Para acompanhar os logs:
 
 ```bash
-docker compose logs -f
+docker compose --env-file .env -f backend/docker-compose.yml logs -f
 ```
 
 Os serviços ficam disponíveis em:
@@ -76,7 +82,6 @@ No primeiro acesso a `/admin`, crie a conta de administrador do Strapi.
 
 - `GET /health`: verifica se a API está respondendo.
 - `GET /observar-hoje`: retorna informações astronômicas para a localização configurada, incluindo fase atual (Nova, Crescente, Cheia ou Minguante), porcentagem iluminada da Lua e nome/data UTC da próxima fase diferente da atual. Na primeira chamada, o Skyfield pode baixar o arquivo de efemérides `de421.bsp`.
-- `GET /pagina-inicial`: retorna o conteúdo publicado da página inicial do Strapi (`titulo` e `texto_apresentacao`) com os arquivos vinculados em `imagem_destaque`.
 - `POST /registros-observacao`: exemplo de rota protegida por JWT do Strapi; a gravação do registro ainda não está implementada.
 
 ## Encerrar e persistência dos dados
@@ -84,13 +89,13 @@ No primeiro acesso a `/admin`, crie a conta de administrador do Strapi.
 Para parar os containers:
 
 ```bash
-docker compose down
+docker compose --env-file .env -f backend/docker-compose.yml down
 ```
 
-Os dados do PostgreSQL e os uploads do Strapi ficam em volumes Docker e são preservados ao parar os serviços. Para apagá-los também, use `docker compose down -v`; isso exclui os dados persistidos.
+Os dados do PostgreSQL e os uploads do Strapi ficam em volumes Docker e são preservados ao parar os serviços. Para apagá-los também, use `docker compose --env-file .env -f backend/docker-compose.yml down -v`; isso exclui os dados persistidos.
 
-## Estrutura
-=======
+## Estrutura do Front-end
+
 Dentro da pasta `frontend/src/`, o código é organizado de forma lógica:
 
 
@@ -134,7 +139,7 @@ Se ainda não tem, baixe a versão recomendada (LTS) no site oficial: [nodejs.or
 Abra o seu terminal (Prompt de Comando, PowerShell ou Terminal do VS Code) e navegue até a pasta do front-end:
 
 ```bash
-cd "c:\Users\jaime\Desktop\Projeto de extensão V\frontend"
+cd frontend
 ```
 
 ### 3. Instalar as Dependências
