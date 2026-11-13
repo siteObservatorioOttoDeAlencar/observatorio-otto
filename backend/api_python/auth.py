@@ -8,6 +8,8 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError, jwt
 
+from database import get_db as get_db
+
 STRAPI_JWT_SECRET = os.getenv("STRAPI_JWT_SECRET", "troque_este_segredo")
 ALGORITHM = "HS256"
 

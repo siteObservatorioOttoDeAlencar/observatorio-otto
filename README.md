@@ -53,36 +53,56 @@ Aqui você não precisa ser especialista para entender. Cada ferramenta tem um p
 
 ## Executar o backend com Docker
 
-Configure o arquivo `.env` na raiz seguindo as instruções de [backend/README.md](backend/README.md). Na raiz do repositório, inicie os serviços:
+O backend tem três serviços: PostgreSQL persiste os dados; Strapi oferece o CMS e a API de conteúdo; e FastAPI fornece endpoints próprios, incluindo os cálculos astronômicos. O Strapi executado pelo Docker está em `backend/strapi/app`.
 
-```bash
-docker compose --env-file .env -f backend/docker-compose.yml up --build
-```
+### Preparação e inicialização
 
-Na primeira inicialização, o Strapi pode levar alguns minutos para iniciar enquanto configura o ambiente. Para acompanhar os logs:
+1. Instale o Docker Desktop com Docker Compose.
+2. Na raiz do repositório, crie o arquivo `.env` com as variáveis e segredos descritos no [guia de configuração do backend](backend/README.md). Não versione nem compartilhe esse arquivo. Credenciais do Cloudinary são necessárias para usar o upload de mídia.
+3. Construa a imagem e instale as dependências do Strapi no container:
+
+   ```bash
+   docker compose --env-file .env -f backend/docker-compose.yml build
+   docker compose --env-file .env -f backend/docker-compose.yml run --rm --no-deps strapi npm ci
+   ```
+
+4. Inicie os serviços:
+
+   ```bash
+   docker compose --env-file .env -f backend/docker-compose.yml up --build
+   ```
+
+Na primeira inicialização, o Strapi pode levar alguns minutos. Para acompanhar os logs:
 
 ```bash
 docker compose --env-file .env -f backend/docker-compose.yml logs -f
 ```
 
-Os serviços ficam disponíveis em:
+Endereços locais:
 
 | Serviço | Endereço |
 | --- | --- |
 | Painel administrativo do Strapi | http://localhost:1337/admin |
-| API do Strapi | http://localhost:1337 |
+| API do Strapi | http://localhost:1337/api |
 | API FastAPI | http://localhost:8000 |
 | Documentação interativa FastAPI | http://localhost:8000/docs |
 | Verificação da API FastAPI | http://localhost:8000/health |
 | PostgreSQL | `localhost:5432` |
 
-No primeiro acesso a `/admin`, crie a conta de administrador do Strapi.
+No primeiro acesso a `/admin`, crie a conta de administrador. No painel, crie e publique os conteúdos e configure as permissões de acesso à API do Strapi conforme necessário.
 
 ### Endpoints da API FastAPI
 
-- `GET /health`: verifica se a API está respondendo.
-- `GET /observar-hoje`: retorna informações astronômicas para a localização configurada, incluindo fase atual (Nova, Crescente, Cheia ou Minguante), porcentagem iluminada da Lua e nome/data UTC da próxima fase diferente da atual. Na primeira chamada, o Skyfield pode baixar o arquivo de efemérides `de421.bsp`.
-- `POST /registros-observacao`: exemplo de rota protegida por JWT do Strapi; a gravação do registro ainda não está implementada.
+- `GET /health` (público): confirma que a FastAPI está ativa.
+- `GET /observar-hoje` (público): calcula planetas visíveis, direções e condições de observação para as coordenadas configuradas, além do nome e ângulo da fase atual da Lua. Não retorna porcentagem iluminada nem data da próxima fase. O cálculo usa Skyfield e o arquivo de efemérides DE421; se houver falha no cálculo, retorna uma resposta em modo degradado.
+- `GET /eventos` (protegido): exige um JWT válido assinado com `STRAPI_JWT_SECRET` e consulta os eventos no PostgreSQL. Retorna `imagem_url` (primeira imagem) e `imagem_urls` (todas as imagens). Essa rota depende das tabelas `eventos` e das relações de mídia do Strapi existirem no banco; o content-type `Evento` não está definido atualmente em `backend/strapi/app`.
+- `POST /registros-observacao` (protegido): exemplo de rota com JWT; ainda não grava registros e retorna uma mensagem informando que está pendente de implementação.
+
+### Como os dados chegam à aplicação
+
+- O conteúdo editorial é criado e publicado no painel do Strapi. A disponibilidade dos endpoints de conteúdo depende dos content-types existentes e das permissões configuradas no painel.
+- A FastAPI calcula os dados astronômicos no endpoint `/observar-hoje`; o frontend consome essa rota e pode usar dados de fallback se o serviço não estiver disponível.
+- Para rotas protegidas, o cliente envia `Authorization: Bearer <token>` emitido pelo Strapi. A FastAPI valida o token com o segredo compartilhado; ela não oferece login próprio.
 
 ## Encerrar e persistência dos dados
 

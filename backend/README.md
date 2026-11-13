@@ -76,8 +76,9 @@ No primeiro acesso a `/admin`, crie a conta de administrador do Strapi.
 ### Endpoints da API FastAPI
 
 - `GET /health`: verifica se a API está respondendo.
-- `GET /observar-hoje`: retorna informações astronômicas para a localização configurada. Na primeira chamada, o Skyfield pode baixar o arquivo de efemérides `de421.bsp`.
+- `GET /observar-hoje`: calcula planetas visíveis e condições de observação para a localização configurada, além do nome e ângulo da fase atual da Lua. Não retorna porcentagem iluminada nem data da próxima fase. Se houver falha no cálculo, retorna uma resposta em modo degradado.
 - `POST /registros-observacao`: exemplo de rota protegida por JWT do Strapi; a gravação do registro ainda não está implementada.
+- `GET /eventos`: rota protegida por JWT que consulta os eventos no PostgreSQL e inclui `imagem_url` com a primeira imagem associada e `imagem_urls` com todas as URLs. Depende de as tabelas `eventos` e as relações de mídia existirem no banco; o content-type `Evento` não está definido atualmente em `backend/strapi/app`.
 
 ## Encerrar e persistência dos dados
 
