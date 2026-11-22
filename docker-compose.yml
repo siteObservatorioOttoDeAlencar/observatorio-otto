@@ -1,4 +1,10 @@
-version: "3.8"
+# Ambiente de desenvolvimento local.
+#
+# - postgres:   banco compartilhado (Payload usa o schema "public"; a FastAPI usa "observacoes").
+# - api-python: FastAPI (http://localhost:8000).
+#
+# O CMS (cms/) NÃO roda aqui: rode `npm run dev` dentro de cms/ (http://localhost:3000).
+# Em produção nada disto é usado: CMS e API rodam na Vercel e o banco é o Neon.
 
 services:
   postgres:
@@ -10,43 +16,16 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-observatorio}
       POSTGRES_DB: ${POSTGRES_DB:-observatorio}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      # Executado só na primeira criação do volume (cria o schema da FastAPI).
+      - ./docker/postgres-init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-observatorio}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-observatorio} -d ${POSTGRES_DB:-observatorio}"]
       interval: 5s
       timeout: 5s
       retries: 5
-
-  strapi:
-    build:
-      context: ./strapi
-    container_name: observatorio-strapi
-    restart: unless-stopped
-    depends_on:
-      postgres:
-        condition: service_healthy
-    environment:
-      DATABASE_CLIENT: postgres
-      DATABASE_HOST: postgres
-      DATABASE_PORT: 5432
-      DATABASE_NAME: ${POSTGRES_DB:-observatorio}
-      DATABASE_USERNAME: ${POSTGRES_USER:-observatorio}
-      DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-observatorio}
-      DATABASE_SCHEMA: strapi
-      JWT_SECRET: ${STRAPI_JWT_SECRET:-troque_este_segredo}
-      ADMIN_JWT_SECRET: ${STRAPI_ADMIN_JWT_SECRET:-troque_este_segredo_admin}
-      APP_KEYS: ${STRAPI_APP_KEYS:-chave1,chave2,chave3,chave4}
-      API_TOKEN_SALT: ${STRAPI_API_TOKEN_SALT:-troque_este_salt}
-      CLOUDINARY_NAME: ${CLOUDINARY_NAME}
-      CLOUDINARY_KEY: ${CLOUDINARY_KEY}
-      CLOUDINARY_SECRET: ${CLOUDINARY_SECRET}
-    ports:
-      - "1337:1337"
-    volumes:
-       - ./strapi/app:/app
-       - strapi_uploads:/app/public/uploads
 
   api-python:
     build:
@@ -58,12 +37,15 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-observatorio}:${POSTGRES_PASSWORD:-observatorio}@postgres:5432/${POSTGRES_DB:-observatorio}
-      STRAPI_JWT_SECRET: ${STRAPI_JWT_SECRET:-troque_este_segredo}
-      STRAPI_URL: http://strapi:1337
+      # O cms/ roda na máquina host (npm run dev), não em contêiner.
+      CMS_URL: ${CMS_URL:-http://host.docker.internal:3000}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:3001}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "8000:8000"
     volumes:
       - ./api_python:/app
+
 volumes:
   postgres_data:
-  strapi_uploads:

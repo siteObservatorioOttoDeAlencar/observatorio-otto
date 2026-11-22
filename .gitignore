@@ -1,17 +1,24 @@
+# Segredos (use os arquivos .env.example como modelo)
+.env
+.env.local
+
+# Python
 venv/
+.venv/
 __pycache__/
 *.pyc
-.env
-node_modules/
-de421.bsp
-strapi/app/node_modules/
-strapi/app/.cache/
-*strapi-log.txt
-# Logs
-*.log
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
 .coverage
 htmlcov/
-strapi/app/src/admin/webpack.config.example.js
+
+# Node / Next.js
+node_modules/
+.next/
+
+# Vercel
+.vercel/
+
+# Logs
+*.log
