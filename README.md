@@ -217,9 +217,11 @@ alterar coleção/global → gerar migração → testar local → Pull Request 
    Revise o arquivo novo em `src/migrations/` (ele também é registrado em `index.ts`).
 3. **Aplique e teste** localmente: `npm run payload migrate` e `npm run dev`.
 4. **Abra um Pull Request** incluindo a migração. Nunca edite uma migração que já foi para produção: crie outra.
-5. **Merge** → a Vercel faz o deploy. O *Build Command* `npm run ci` executa `payload migrate && next build`: as migrações pendentes rodam no Neon antes do build.
+5. **Merge na `main`** (a branch de produção) → a Vercel faz o deploy dos três projetos. O *Build Command* `npm run ci` executa `payload migrate && next build`: as migrações pendentes rodam no Neon antes do build.
 
-> ⚠️ O projeto do CMS **não gera Preview Deployments**: o *Ignored Build Step* (`[ "$VERCEL_ENV" != "production" ]`) cancela builds que não sejam de produção, e Neon e Blob estão conectados só ao ambiente Production. Motivo: um Preview rodaria `payload migrate` no mesmo banco da produção, aplicando a migração de um PR **antes** do merge. Valide migrações localmente (passo 3).
+> **A `main` é a branch de produção** dos três projetos da Vercel, e **toda mudança entra por Pull Request** (a `main` é protegida: sem push direto). Cada merge na `main` publica CMS, API e site.
+
+> ⚠️ O projeto do CMS **não gera Preview Deployments**: o *Ignored Build Step* (`[ "$VERCEL_GIT_COMMIT_REF" != "main" ]`) cancela qualquer build de uma branch que não seja a `main`, e Neon e Blob estão conectados só ao ambiente Production. Motivo: um Preview rodaria `payload migrate` no mesmo banco da produção, aplicando a migração de um PR **antes** do merge. Valide migrações localmente (passo 3).
 
 Edições de **conteúdo** (textos, imagens, publicação) são feitas no `/admin` e não passam por PR.
 
@@ -246,9 +248,8 @@ A função da API **não pode baixar nem gravar arquivos**: por isso `backend/ap
 
 ## Pendências
 
-- [ ] **Voltar a Production Branch para `main`.** Nos **três** projetos da Vercel (`observatorio-otto-cms`, `-api` e `-site`) a *Production Branch* está temporariamente em **`melquidev-vercel`**. Depois de validar, faça o merge de `melquidev-vercel` na `main` e volte a Production Branch para `main` (*Settings → Environments → Production → Branch Tracking*, ou *Settings → Git → Production Branch*); confira que o deploy seguinte, a partir da `main`, passa.
-- [ ] Definir `ALLOWED_ORIGINS` (CMS e API) com a URL real do site e confirmar `CMS_URL` / `NEXT_PUBLIC_CMS_URL` com o domínio final do CMS.
-- [ ] As migrações do CMS são duas (`inicial` e `eventos_noticias`); podem ser unificadas numa só antes do primeiro deploy real, enquanto o banco do Neon ainda está vazio.
+- [ ] Se o site ganhar um domínio próprio, atualizar `ALLOWED_ORIGINS` (CMS e API) e `NEXT_PUBLIC_CMS_URL` / `NEXT_PUBLIC_API_URL` com os endereços finais.
+- [ ] As migrações do CMS são duas (`inicial` e `eventos_noticias`); podem ser unificadas numa só enquanto o banco do Neon ainda não tem conteúdo real.
 - [ ] `npm audit` do frontend ainda aponta o `postcss` embutido no Next 15 (afeta só o build; a correção exige Next 16).
 
 ---
