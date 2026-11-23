@@ -11,6 +11,9 @@ from sqlalchemy.orm import Session, sessionmaker
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
+# O Neon entrega "postgres://..."; o SQLAlchemy 2 exige "postgresql://...".
+if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = "postgresql://" + DATABASE_URL[len("postgres://"):]
 engine = create_engine(DATABASE_URL, pool_pre_ping=True) if DATABASE_URL else None
 SessionLocal = (
     sessionmaker(bind=engine, autoflush=False, autocommit=False)

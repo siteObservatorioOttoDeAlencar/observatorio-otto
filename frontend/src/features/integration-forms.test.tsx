@@ -6,11 +6,11 @@ import { LoginForm } from "@/features/auth/components/LoginForm";
 import { ObservationForm } from "@/features/observations/components/ObservationForm";
 
 describe("[Integration] Formulários Técnicos e Submissão (Auth & Observations)", () => {
-  it("deve submeter credenciais de login com identificador e senha", async () => {
+  it("deve submeter credenciais de login com e-mail e senha", async () => {
     const handleSubmit = vi.fn((e: React.FormEvent) => e.preventDefault());
     render(<LoginForm onSubmit={handleSubmit} />);
 
-    await userEvent.type(screen.getByPlaceholderText(/astronomo@observatorio.ce/i), "astronomo.ceara");
+    await userEvent.type(screen.getByPlaceholderText(/astronomo@observatorio.ce/i), "astronomo@observatorio.ce");
     await userEvent.type(screen.getByPlaceholderText(/••••••••/i), "senhaForte123");
     
     await userEvent.click(screen.getByRole("button", { name: /acessar observatório/i }));

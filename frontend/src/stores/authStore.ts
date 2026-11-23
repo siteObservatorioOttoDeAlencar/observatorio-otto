@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { StrapiUser } from "@/types/auth";
+import { CmsUser } from "@/types/auth";
 
 /**
  * 🎓 GERENCIAMENTO DE ESTADO GLOBAL DE AUTENTICAÇÃO (Zustand)
@@ -15,9 +15,9 @@ import { StrapiUser } from "@/types/auth";
  */
 interface AuthState {
   token: string | null;
-  user: StrapiUser | null;
+  user: CmsUser | null;
   isAuthenticated: boolean;
-  setAuth: (token: string, user: StrapiUser) => void;
+  setAuth: (token: string, user: CmsUser) => void;
   logout: () => void;
 }
 
@@ -27,7 +27,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isAuthenticated: false,
 
-  // Salva o token emitido pelo Strapi e os dados do usuário após login bem-sucedido
+  // Salva o token emitido pelo CMS e os dados do usuário após login bem-sucedido
   setAuth: (token, user) => set({ token, user, isAuthenticated: true }),
 
   // Limpa o estado quando o usuário clica em "Sair" na interface

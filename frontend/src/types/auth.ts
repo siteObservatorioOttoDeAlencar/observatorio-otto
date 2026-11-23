@@ -1,26 +1,20 @@
-export interface StrapiUser {
+/** Perfis definidos no CMS (campo "perfil" dos usuários). */
+export type Perfil = "administrador" | "coordenador" | "editor" | "observacao";
+
+/** Usuário devolvido pelo CMS no login. */
+export interface CmsUser {
   id: number;
-  username: string;
   email: string;
-  provider: string;
-  confirmed: boolean;
-  blocked: boolean;
-  createdAt: string;
-  updatedAt: string;
+  perfil: Perfil;
 }
 
 export interface AuthResponse {
-  jwt: string;
-  user: StrapiUser;
+  token: string;
+  user: CmsUser;
+  exp?: number;
 }
 
 export interface LoginCredentials {
-  identifier: string; // e-mail ou username no Strapi
-  password: string;
-}
-
-export interface RegisterCredentials {
-  username: string;
   email: string;
   password: string;
 }

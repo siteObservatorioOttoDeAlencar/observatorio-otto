@@ -2,12 +2,16 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { ArrowLeft, Calendar, Clock, Share2, User, Sparkles } from "lucide-react";
 import { useArticle } from "@/features/content/hooks/useArticles";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { RichText } from "@/components/content/RichText";
+import type { LexicalState } from "@/types/cms";
 
-// Banco de dados editorial detalhado para leitura completa
+// Acervo de reserva com leitura completa (usado quando o CMS não responde ou não tem o artigo)
 const ESSAY_DETAILS: Record<string, {
   titulo: string;
   subtitulo: string;
@@ -17,6 +21,7 @@ const ESSAY_DETAILS: Record<string, {
   autor: string;
   cargo: string;
   conteudo: string[];
+  corpo?: LexicalState | null;
 }> = {
   "otto-de-alencar-relatividade-sobral-1919": {
     titulo: "Otto de Alencar e o Teste da Teoria da Relatividade Geral em Sobral (1919)",
@@ -49,41 +54,53 @@ const ESSAY_DETAILS: Record<string, {
   },
 };
 
-export default function ArtigoDetalhesPage({
-  params,
-}: {
-  params: { slug: string };
-}) {
-  const { data: remoteArticle, isLoading } = useArticle(params.slug);
+export default function ArtigoDetalhesPage() {
+  const { slug } = useParams<{ slug: string }>();
+  const { data: artigoCms, isLoading } = useArticle(slug);
 
-  // Busca no banco editorial estático como fallback detalhado se não houver no Strapi
+  // Prioridade: artigo publicado no CMS; senão o acervo de reserva; senão "não encontrado"
   const article = React.useMemo(() => {
-    if (remoteArticle) {
+    if (artigoCms) {
       return {
-        titulo: remoteArticle.attributes.titulo,
-        subtitulo: remoteArticle.attributes.resumo || "",
-        categoria: remoteArticle.attributes.categoria || "Pesquisa",
-        tempoLeitura: "8 min de leitura",
-        publishedAt: remoteArticle.attributes.publishedAt,
-        autor: "Pesquisador do Observatório",
-        cargo: "Equipe Editorial",
-        conteudo: [remoteArticle.attributes.conteudo],
+        titulo: artigoCms.titulo,
+        subtitulo: artigoCms.resumo,
+        categoria: artigoCms.categoria,
+        tempoLeitura: `${artigoCms.tempoLeitura} de leitura`,
+        publishedAt: artigoCms.publicadoEm,
+        autor: artigoCms.autor,
+        cargo: "Observatório Otto de Alencar",
+        conteudo: [] as string[],
+        corpo: artigoCms.corpo ?? null,
       };
     }
-    return ESSAY_DETAILS[params.slug] || {
-      titulo: params.slug.replace(/-/g, " ").toUpperCase(),
-      subtitulo: "Publicação técnica do acervo digital do Observatório Otto de Alencar.",
-      categoria: "Astronomia",
-      tempoLeitura: "6 min de leitura",
-      publishedAt: new Date().toISOString(),
-      autor: "Comitê Científico",
-      cargo: "Pesquisa & Extensão",
-      conteudo: [
-        "Este artigo faz parte do compêndio de ensaios e medições do Observatório Astronômico Otto de Alencar.",
-        "Os dados observacionais coletados são periodicamente correlacionados com bases de dados internacionais de astrometria e fotometria celeste.",
-      ],
-    };
-  }, [remoteArticle, params.slug]);
+    return ESSAY_DETAILS[slug] ?? null;
+  }, [artigoCms, slug]);
+
+  if (isLoading && !article) {
+    return (
+      <div className="max-w-3xl mx-auto py-8 sm:py-12 space-y-6">
+        <Skeleton className="h-10 w-3/4" />
+        <Skeleton className="h-64 rounded-2xl" />
+      </div>
+    );
+  }
+
+  if (!article) {
+    return (
+      <div className="max-w-3xl mx-auto py-16 text-center space-y-4">
+        <h1 className="font-display text-2xl font-bold text-lunar-silver">Artigo não encontrado</h1>
+        <p className="text-sm text-space-text-muted">
+          Este endereço não corresponde a nenhum artigo publicado.
+        </p>
+        <Link href="/conteudo">
+          <Button variant="outline" size="sm" className="gap-2">
+            <ArrowLeft className="h-3.5 w-3.5" />
+            <span>Voltar ao Acervo de Artigos</span>
+          </Button>
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-3xl mx-auto py-8 sm:py-12 space-y-10">
@@ -141,13 +158,20 @@ export default function ArtigoDetalhesPage({
       </header>
 
       {/* Corpo do Artigo / Ensaio */}
-      <div className="space-y-6 text-lunar-silver/90 text-base sm:text-lg leading-relaxed font-sans">
-        {article.conteudo.map((paragrafo, index) => (
-          <p key={index} className="first-letter:text-3xl first-letter:font-bold first-letter:text-nebula-cyan first-letter:mr-1">
-            {paragrafo}
-          </p>
-        ))}
-      </div>
+      {article.corpo ? (
+        <RichText
+          dados={article.corpo}
+          className="text-lunar-silver/90 text-base sm:text-lg leading-relaxed font-sans"
+        />
+      ) : (
+        <div className="space-y-6 text-lunar-silver/90 text-base sm:text-lg leading-relaxed font-sans">
+          {article.conteudo.map((paragrafo, index) => (
+            <p key={index} className="first-letter:text-3xl first-letter:font-bold first-letter:text-nebula-cyan first-letter:mr-1">
+              {paragrafo}
+            </p>
+          ))}
+        </div>
+      )}
 
       {/* Caixa de Citação / Destaque Científico */}
       <div className="cosmic-glass rounded-2xl p-6 border-l-4 border-nebula-cyan border-space-border/80">

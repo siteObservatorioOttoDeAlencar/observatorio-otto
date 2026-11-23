@@ -2,343 +2,263 @@
 
 > Uma plataforma web moderna, aberta e acessível que responde em menos de 5 segundos se vale a pena olhar para o céu de Fortaleza hoje à noite, para onde olhar e o que você consegue ver com o que tem à mão.
 
----
-
 ## O Que É Este Projeto?
 
-O **Observatório Digital Otto de Alencar** é um projeto de extensão universitária e divulgação científica sediado em Fortaleza, Ceará. 
+O **Observatório Digital Otto de Alencar** é um projeto de extensão universitária (UECE) e de divulgação científica sediado em Fortaleza, Ceará, que **aproxima a astronomia do público em geral**: curiosos e famílias, estudantes e professores, e astrônomos amadores. Ele traduz cálculos matemáticos e dados da NASA em linguagem humana, orientações práticas e recursos visuais intuitivos.
 
-Ele nasceu com um propósito muito claro: **aproximar a astronomia do público em geral**. 
-
-### Para Quem Foi Criado?
-- **Curiosos e Famílias:** Pessoas que querem saber se o céu está bonito hoje para ver com os filhos ou da janela de casa.
-- **Estudantes e Professores:** Escolas que desejam acompanhar fenômenos celestes e agendar visitas ao telescópio do observatório.
-- **Astrônomos Amadores:** Observadores que possuem lunetas ou telescópios e precisam de coordenadas precisas calculadas para a latitude de Fortaleza.
-
-### Qual Problema Ele Resolve?
-Muitos sites de astronomia são acadêmicos demais, cheios de números difíceis (como altitude, azimute e fórmulas) ou parecem manuais antigos. O usuário comum só quer saber: *"O que é aquela luz brilhante no céu? Preciso de telescópio? Para onde eu olho?"*. 
-
-Este projeto traduz cálculos matemáticos e da NASA em **linguagem humana**, orientações práticas e recursos visuais intuitivos.
+Ao entrar no site, qualquer pessoa consegue saber se o céu está bom hoje, ver os planetas e a Lua com orientações em **Modo Simples** ou **Modo Técnico**, filtrar o que dá para ver a olho nu, de binóculo ou de telescópio, acompanhar a **agenda de eventos** do observatório e ler artigos de divulgação científica.
 
 ---
 
-## Visão Geral
+## Arquitetura
 
-Ao entrar no site, qualquer pessoa consegue:
-
-1. **Saber se o céu está bom em 1 segundo:** O topo da página avisa se as condições estão favoráveis e qual o melhor horário da noite.
-2. **Descobrir os destaques de hoje:** Cartões simples mostram se os planetas (como Júpiter e Saturno) e a Lua estão visíveis.
-3. **Alternar entre Modo Simples e Modo Técnico:** 
-   - O *Modo Simples* diz: *"Olhe para o Leste (onde o Sol nasce) a meia altura"*.
-   - O *Modo Técnico* mostra: *Altitude +52.8°, Azimute 78.4°, Magnitude -2.5*.
-4. **Filtrar pelo que você tem em casa:** Abas dedicadas mostram o que dá para ver **A Olho Nu**, com um **Binóculo Comum** ou com um **Telescópio**.
-5. **Agendar visitas gratuitas:** Informações sobre as sessões abertas de sábado com o telescópio principal de 11 polegadas.
-6. **Ler artigos científicos e históricos:** Ensaios sobre astrofísica e o papel histórico de Otto de Alencar no teste da Teoria da Relatividade em Sobral (1919).
-
----
-
-## Tecnologias Utilizadas (Em Linguagem Humana)
-
-Aqui você não precisa ser especialista para entender. Cada ferramenta tem um papel bem definido:
-
-* **Next.js (v14):** O maestro do front-end. Ele cuida da criação das páginas, das rotas e garante que o site carregue muito rápido.
-* **TypeScript:** Uma camada de segurança sobre o JavaScript. Ele avisa se você tentar passar um texto onde deveria ser um número, evitando bugs bobos.
-* **Tailwind CSS:** O estilista da interface. Em vez de escrever arquivos CSS gigantes, usamos classes práticas direto nos componentes (como `p-4` para espaçamento ou `text-white` para cor branca).
-* **TanStack Query (React Query):** O mensageiro de dados. Ele busca as informações do backend, guarda em cache (memória temporária) e atualiza a tela sem recarregar a página.
-* **Framer Motion:** O animador sutil. Adiciona transições suaves e elegantes quando os cards aparecem na tela.
-* **FastAPI (Backend em Python):** O cérebro matemático. Ele usa bibliotecas astronômicas de alta precisão (Skyfield) para calcular onde os planetas estão no céu de Fortaleza neste exato segundo.
-* **Strapi CMS (Gerenciador de Conteúdo):** O painel do professor. Um painel fácil onde a equipe editorial escreve notícias e artigos sem precisar encostar no código.
-
----
-
-## Executar o backend com Docker
-
-O backend tem três serviços: PostgreSQL persiste os dados; Strapi oferece o CMS e a API de conteúdo; e FastAPI fornece endpoints próprios, incluindo os cálculos astronômicos. O Strapi executado pelo Docker está em `backend/strapi/app`.
-
-### Preparação e inicialização
-
-1. Instale o Docker Desktop com Docker Compose.
-2. Na raiz do repositório, crie o arquivo `.env` com as variáveis e segredos descritos no [guia de configuração do backend](backend/README.md). Não versione nem compartilhe esse arquivo. Credenciais do Cloudinary são necessárias para usar o upload de mídia.
-3. Construa a imagem e instale as dependências do Strapi no container:
-
-   ```bash
-   docker compose --env-file .env -f backend/docker-compose.yml build
-   docker compose --env-file .env -f backend/docker-compose.yml run --rm --no-deps strapi npm ci
-   ```
-
-4. Inicie os serviços:
-
-   ```bash
-   docker compose --env-file .env -f backend/docker-compose.yml up --build
-   ```
-
-Na primeira inicialização, o Strapi pode levar alguns minutos. Para acompanhar os logs:
-
-```bash
-docker compose --env-file .env -f backend/docker-compose.yml logs -f
-```
-
-Endereços locais:
-
-| Serviço | Endereço |
-| --- | --- |
-| Painel administrativo do Strapi | http://localhost:1337/admin |
-| API do Strapi | http://localhost:1337/api |
-| API FastAPI | http://localhost:8000 |
-| Documentação interativa FastAPI | http://localhost:8000/docs |
-| Verificação da API FastAPI | http://localhost:8000/health |
-| PostgreSQL | `localhost:5432` |
-
-No primeiro acesso a `/admin`, crie a conta de administrador. No painel, crie e publique os conteúdos e configure as permissões de acesso à API do Strapi conforme necessário.
-
-### Endpoints da API FastAPI
-
-- `GET /health` (público): confirma que a FastAPI está ativa.
-- `GET /observar-hoje` (público): calcula planetas visíveis, direções e condições de observação para as coordenadas configuradas, além do nome e ângulo da fase atual da Lua. Não retorna porcentagem iluminada nem data da próxima fase. O cálculo usa Skyfield e o arquivo de efemérides DE421; se houver falha no cálculo, retorna uma resposta em modo degradado.
-- `GET /eventos` (protegido): exige um JWT válido assinado com `STRAPI_JWT_SECRET` e consulta os eventos no PostgreSQL. Retorna `imagem_url` (primeira imagem) e `imagem_urls` (todas as imagens). Essa rota depende das tabelas `eventos` e das relações de mídia do Strapi existirem no banco; o content-type `Evento` não está definido atualmente em `backend/strapi/app`.
-- `POST /registros-observacao` (protegido): exemplo de rota com JWT; ainda não grava registros e retorna uma mensagem informando que está pendente de implementação.
-
-### Como os dados chegam à aplicação
-
-- O conteúdo editorial é criado e publicado no painel do Strapi. A disponibilidade dos endpoints de conteúdo depende dos content-types existentes e das permissões configuradas no painel.
-- A FastAPI calcula os dados astronômicos no endpoint `/observar-hoje`; o frontend consome essa rota e pode usar dados de fallback se o serviço não estiver disponível.
-- Para rotas protegidas, o cliente envia `Authorization: Bearer <token>` emitido pelo Strapi. A FastAPI valida o token com o segredo compartilhado; ela não oferece login próprio.
-
-## Encerrar e persistência dos dados
-
-Para parar os containers:
-
-```bash
-docker compose --env-file .env -f backend/docker-compose.yml down
-```
-
-Os dados do PostgreSQL e os uploads do Strapi ficam em volumes Docker e são preservados ao parar os serviços. Para apagá-los também, use `docker compose --env-file .env -f backend/docker-compose.yml down -v`; isso exclui os dados persistidos.
-
-## Estrutura do Front-end
-
-Dentro da pasta `frontend/src/`, o código é organizado de forma lógica:
-
+Tudo roda em planos **gratuitos** (Vercel Hobby, Neon Free, Vercel Blob). São **três projetos Vercel** a partir deste repositório:
 
 ```text
-frontend/src/
-├── app/                    # 📄 As Páginas do Sistema (Next.js App Router)
-│   ├── (public)/           # Páginas abertas (Home, O Céu Hoje, Galeria, Artigos, Contato)
-│   ├── (auth)/             # Telas de Login e Cadastro
-│   └── (authenticated)/    # Painel interno do astrônomo e novos registros de observação
-│
-├── components/             # 🧱 Os Tijolos Visuais da Interface
-│   ├── astronomy/          # Componentes específicos de astronomia (badges, ícones da lua)
-│   ├── home/               # Seções que compõem a página inicial
-│   ├── layout/             # Barra de navegação do topo (Navbar), Rodapé (Footer) e Container
-│   └── ui/                 # Componentes básicos reaproveitáveis (Botões, Cards, Badges, Modais)
-│
-├── features/               # 📦 Funcionalidades Completas com Lógica de Dados
-│   ├── sky-today/          # Lógica do "Céu Hoje" (hooks, serviços e cálculos)
-│   └── content/            # Lógica dos artigos e notícias do Strapi
-│
-├── lib/                    # ⚙️ Ferramentas e Configurações Gerais
-│   ├── clients/            # Conectores HTTP para a FastAPI e para o Strapi
-│   ├── constants.ts        # Coordenadas de Fortaleza e URLs padrão
-│   └── utils/              # Pequenas funções utilitárias (ex: junção de classes CSS)
-│
-├── stores/                 # 💾 Estado Global da Aplicação (Zustand para login do usuário)
-├── styles/                 # 🎨 Estilos Globais e Tokens de Cores (globals.css)
-└── types/                  # 📐 Tipos do TypeScript (formatos dos planetas, artigos e respostas)
+                 ┌───────────────────────────────┐
+                 │  Site — Next.js (frontend/)   │
+                 └───────┬───────────────┬───────┘
+                         │ conteúdo,     │ cálculos e
+                         │ login         │ registros
+                         ▼               ▼
+        ┌────────────────────────┐   ┌──────────────────────────┐
+        │ CMS — Payload 3        │◄──│ API — FastAPI (Python)   │
+        │ backend/cms            │   │ backend/api_python       │
+        └──┬──────────────────┬──┘   └───────────┬──────────────┘
+           │                  │  valida login    │
+           │                  │  (GET /api/users/me)
+           ▼                  ▼                  ▼
+   ┌─────────────┐   ┌──────────────────────────────────────┐
+   │ Vercel Blob │   │ Neon Postgres (plano Free)           │
+   │ imagens     │   │  schema "public"      → Payload      │
+   └─────────────┘   │  schema "observacoes" → FastAPI      │
+                     └──────────────────────────────────────┘
+```
+
+| Peça | Pasta | Tecnologia | Função |
+| --- | --- | --- | --- |
+| Site | `frontend/` | Next.js 15, React 19, Tailwind, TanStack Query | Páginas públicas, login, registro de observações |
+| CMS | `backend/cms` | Payload CMS 3 (app Next.js) | Painel `/admin`, usuários e perfis, conteúdo, API REST/GraphQL |
+| API | `backend/api_python` | FastAPI + Skyfield | `GET /observar-hoje`, `POST /registros-observacao` (protegida) |
+| Banco | — | Neon Postgres | Um banco, dois schemas |
+| Arquivos | — | Vercel Blob (`@payloadcms/storage-vercel-blob`) | Fotos e mídias enviadas no CMS |
+
+**Login único:** quem faz login é o Payload (e-mail e senha). A FastAPI não tem senha nem segredo de JWT: ela repassa o cabeçalho `Authorization` recebido para `GET {CMS_URL}/api/users/me` e usa o `user.perfil` da resposta. O site envia `Authorization: JWT <token>` nos dois backends.
+
+### Conteúdo do CMS
+
+| Tipo | Slug da API | Campos principais | Leitura pública |
+| --- | --- | --- | --- |
+| Global **Início** | `/api/globals/inicio` | `titulo`, `apresentacao` (texto rico), `destaques` (mídias) | só o publicado |
+| **Eventos** | `/api/eventos` | `titulo`, `tipo` (observação, oficina, palestra, visita), `inicio`, `fim`, `local`, `descricao`, `publicoAlvo`, `situacao` (agendado, realizado, cancelado), `linkInscricao`, `fotos`, `relato` | só o publicado |
+| **Notícias** | `/api/noticias` | `titulo`, `slug`, `resumo`, `categoria`, `autor`, `corpo`, `capa`, `dataPublicacao`, `projetoRelacionado` | só o publicado |
+| **Mídias** | `/api/media` | `alt` (obrigatório), `legenda`, `credito` + arquivo | sim |
+| **Usuários** | `/api/users` | `email`, `perfil` | não |
+
+Início, Eventos e Notícias têm **rascunho/publicação**: visitantes só enxergam o publicado (inclusive com `?draft=true`); quem edita vê os rascunhos.
+
+### Perfis de usuário
+
+O campo `perfil` (obrigatório, vai dentro do JWT) define o que cada usuário pode fazer. **Não existe autocadastro**: só administradores criam usuários, e o site não tem página de cadastro ("Para ter acesso, solicite a um administrador").
+
+| Perfil | Painel `/admin` | Editar conteúdo e mídias | Gerenciar usuários | `POST /registros-observacao` |
+| --- | :---: | :---: | :---: | :---: |
+| `administrador` | ✅ | ✅ | ✅ | ✅ |
+| `coordenador` | ✅ | ✅ | — | ✅ |
+| `editor` | ✅ | ✅ | — | ❌ (403) |
+| `observacao` | — | — | — | ✅ |
+
+O **primeiro usuário** criado em `/admin` sempre vira `administrador`.
+
+### Estrutura do repositório
+
+```text
+.
+├── frontend/                 # Site Next.js — projeto Vercel nº 3
+├── backend/
+│   ├── cms/                  # Payload CMS — projeto Vercel nº 1
+│   │   └── src/{collections,globals,access,migrations}
+│   ├── api_python/           # FastAPI — projeto Vercel nº 2 (data/de421.bsp versionado)
+│   ├── docker/postgres-init/ # cria o schema "observacoes" no Postgres local
+│   └── docker-compose.yml    # Postgres + FastAPI para desenvolvimento
+└── README.md
 ```
 
 ---
 
-## Como Executar o Projeto Localmente
+## Como rodar localmente
 
-Siga este passo a passo simples. Você só precisa ter o **Node.js** instalado no seu computador.
+**Pré-requisitos:** Node.js 22 (o Payload 3.94 exige `^22.23.5` ou `^24.22.3`), Python 3.12 e Docker.
 
-### 1. Pré-requisito: Instalar o Node.js
-Se ainda não tem, baixe a versão recomendada (LTS) no site oficial: [nodejs.org](https://nodejs.org/).
-
-### 2. Acessar a pasta do Front-End
-Abra o seu terminal (Prompt de Comando, PowerShell ou Terminal do VS Code) e navegue até a pasta do front-end:
+### 1. Banco de dados (Postgres)
 
 ```bash
-cd frontend
+cd backend
+cp .env.example .env          # opcional: todos os valores têm padrão
+docker compose up -d postgres
 ```
 
-### 3. Instalar as Dependências
-Execute o comando abaixo para baixar as bibliotecas necessárias:
+> Se já existe um Postgres instalado no seu computador usando a porta 5432, defina `POSTGRES_PORT=5433` no `backend/.env` e use `...@127.0.0.1:5433/...` na `DATABASE_URL` do CMS.
+
+### 2. CMS (Payload) — http://localhost:3000
 
 ```bash
+cd backend/cms
+cp .env.example .env          # preencha PAYLOAD_SECRET (openssl rand -hex 32)
 npm install
-```
-*O que ele faz? Lê o arquivo `package.json` e baixa ferramentas como React, Next.js e Tailwind para a pasta `node_modules`.*
-
-### 4. Configurar as Variáveis de Ambiente
-Crie um arquivo chamado `.env.local` na raiz da pasta `frontend/` (você pode duplicar o `.env.example` caso exista):
-
-```env
-# Endereço da API de Efemérides Astronômicas (FastAPI)
-NEXT_PUBLIC_FASTAPI_URL=http://localhost:8000
-
-# Endereço do Painel de Conteúdo (Strapi CMS)
-NEXT_PUBLIC_STRAPI_URL=http://localhost:1337
-
-# Coordenadas Geográficas de Fortaleza (Ceará)
-NEXT_PUBLIC_OBSERVATORIO_LAT=-3.7793
-NEXT_PUBLIC_OBSERVATORIO_LON=-38.5661
-```
-
-### 5. Iniciar o Servidor de Desenvolvimento
-Com tudo configurado, execute:
-
-```bash
+npm run payload migrate       # cria as tabelas (o esquema é controlado por migrações)
 npm run dev
 ```
 
-Pronto! O terminal mostrará:
-```text
-▲ Next.js 14.2.35
-- Local: http://localhost:3000
+1. Abra <http://localhost:3000/admin> e crie o primeiro usuário (vira `administrador`).
+2. Em **Globals → Início**, preencha o título e publique; crie Eventos e Notícias e publique.
+3. Leia pela API: `curl http://localhost:3000/api/globals/inicio`
+
+Sem `BLOB_READ_WRITE_TOKEN`, o plugin do Vercel Blob fica desativado e os uploads vão para `backend/cms/media/` (ignorado pelo Git).
+
+### 3. API (FastAPI) — http://localhost:8000
+
+Com Docker (o contêiner alcança o CMS do seu computador em `host.docker.internal:3000`):
+
+```bash
+cd backend
+docker compose up -d --build api-python     # documentação em http://localhost:8000/docs
 ```
 
-Abra o seu navegador e acesse: **[http://localhost:3000](http://localhost:3000)**.
+Ou direto no Python:
 
----
-
-## Como Conectar ao Backend
-
-O front-end conversa com **dois backends diferentes**, cada um especialista em uma área:
-
-```text
-                  ┌──────────────────────┐
-                  │ Front-End (Next.js)  │
-                  └──────────┬───────────┘
-                             │
-              ┌──────────────┴──────────────┐
-              ▼                             ▼
-   FastAPI (Python) :8000         Strapi CMS (Node) :1337
-   • Posição dos Planetas         • Notícias e Artigos
-   • Fases da Lua                 • Textos de Pesquisa
-   • Efemérides em Tempo Real     • Imagens da Galeria
+```bash
+cd backend/api_python
+python -m venv .venv && source .venv/bin/activate    # Windows: .venv\Scripts\activate
+pip install -r requirements-dev.txt
+cp .env.example .env
+uvicorn main:app --reload --port 8000
+pytest                                               # testes de 401/403/200/502/503 e CORS
 ```
 
-### 1. Como Conectar com a FastAPI (Cálculos Astronômicos)
-- **Arquivo de Configuração:** `src/lib/clients/fastapi-client.ts`
-- **Serviço de Chamadas:** `src/features/sky-today/services/fastapiAstroService.ts`
-- **O que acontece se a FastAPI estiver desligada?**  
-  O sistema é resiliente! Se o backend em Python estiver desligado, o serviço captura o erro e ativa um **modo fallback** com dados astronômicos seguros. A página nunca quebra nem fica em branco.
+Teste rápido com login:
 
-### 2. Como Conectar com o Strapi (Artigos e Notícias)
-- **Arquivo de Configuração:** `src/lib/clients/strapi-client.ts`
-- **Serviço de Chamadas:** `src/features/content/services/strapiContentService.ts`
-- **O que acontece se o Strapi estiver desligado?**  
-  O front-end carrega instantaneamente um acervo editorial científico pré-configurado, garantindo que o visitante sempre tenha leituras disponíveis.
+```bash
+curl -X POST http://localhost:8000/registros-observacao          # 401 (sem login)
+TOKEN=$(curl -s -X POST http://localhost:3000/api/users/login \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"voce@exemplo.com","password":"sua-senha"}' | jq -r .token)
+curl -X POST http://localhost:8000/registros-observacao -H "Authorization: JWT $TOKEN"
+```
+
+Perfil `editor` recebe **403**; `observacao`, `coordenador` e `administrador` recebem 200.
+
+### 4. Site (Next.js) — http://localhost:3001
+
+```bash
+cd frontend
+cp .env.example .env.local
+npm install
+npm run dev          # porta 3001, para não colidir com o CMS na 3000
+npm test             # testes unitários (Vitest)
+npm run build
+```
+
+Se o CMS ou a API estiverem fora do ar, o site **não quebra**: usa conteúdo de reserva (texto de apresentação, acervo de artigos, aviso de agenda indisponível e dados astronômicos padrão).
 
 ---
 
-## Fluxo de Dados Explicado
+## Variáveis de ambiente
 
-Para entender como a mágica acontece na tela:
+Nunca coloque valores reais no repositório: cada projeto tem um `.env.example` com os nomes. Os arquivos `.env` estão no `.gitignore`.
 
-1. **A Tela Pede os Dados:** O componente `HeroStatusCockpit.tsx` chama o hook `useSkyToday()`.
-2. **O TanStack Query Gerencia:** Ele verifica se já buscou esses dados nos últimos 5 minutos. Se sim, entrega do cache na hora.
-3. **O Serviço Faz a Requisição:** Se for a primeira vez, `fastapiAstroService.getObservarHoje()` dispara um `GET` para `http://localhost:8000/observar-hoje`.
-4. **O Backend Responde:** A FastAPI calcula e devolve um JSON com os planetas visíveis e a fase da Lua.
-5. **A Interface Renderiza:** O React atualiza a tela instantaneamente, colorindo os badges e exibindo as orientações humanas.
+### `backend/cms` (projeto Vercel do CMS)
+
+| Variável | Descrição | Origem na Vercel |
+| --- | --- | --- |
+| `DATABASE_URL` | Conexão Postgres | Injetada pela integração Neon (URL *pooled*) |
+| `PAYLOAD_SECRET` | Segredo de JWT/cookies do Payload | Manual: `openssl rand -hex 32` |
+| `BLOB_READ_WRITE_TOKEN` | Token do Vercel Blob | Injetada ao conectar o Blob store |
+| `ALLOWED_ORIGINS` | URL(s) do site autorizadas a chamar o CMS pelo navegador (CORS), separadas por vírgula, sem barra final | Manual |
+
+### `backend/api_python` (projeto Vercel da API)
+
+| Variável | Descrição |
+| --- | --- |
+| `CMS_URL` | URL pública do CMS, sem barra final |
+| `DATABASE_URL` | Mesmo banco Neon do CMS (a API usa o schema `observacoes`) |
+| `ALLOWED_ORIGINS` | Origens do site liberadas no CORS, separadas por vírgula. Vazia = nenhuma |
+| `OBSERVATORIO_LAT` / `OBSERVATORIO_LON` | Opcionais; padrão: Fortaleza |
+
+### `frontend` (projeto Vercel do site)
+
+| Variável | Descrição |
+| --- | --- |
+| `NEXT_PUBLIC_CMS_URL` | URL do CMS (conteúdo e login) |
+| `NEXT_PUBLIC_API_URL` | URL da FastAPI |
+| `NEXT_PUBLIC_OBSERVATORIO_LAT` / `_LON` | Opcionais; padrão: Fortaleza |
+
+### `backend/docker-compose.yml`
+
+`POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `POSTGRES_PORT`, `CMS_URL`, `ALLOWED_ORIGINS` — todas com padrão; veja `backend/.env.example`.
 
 ---
 
-## Como Criar uma Nova Página
+## Fluxo de mudança de conteúdo (modelo de dados)
 
-Criar uma página no Next.js é tão simples quanto criar uma pasta com um arquivo `page.tsx`:
+O banco do Payload é controlado por **migrações** (`push` desligado, inclusive no desenvolvimento), então o que você testa local é exatamente o que roda em produção.
 
-1. Para criar uma página `/sobre-o-telescopio`, crie a pasta:  
-   `src/app/(public)/sobre-o-telescopio/`
-2. Crie o arquivo `page.tsx` dentro dela:
-   ```tsx
-   import React from "react";
+```text
+alterar coleção/global → gerar migração → testar local → Pull Request → merge → deploy automático
+```
 
-   export default function SobreTelescopioPage() {
-     return (
-       <div className="container mx-auto py-12 text-white">
-         <h1 className="text-3xl font-bold">Nosso Telescópio Principal</h1>
-         <p className="mt-4 text-space-text-muted">
-           Detalhes sobre a ótica de 11 polegadas instalada em Fortaleza.
-         </p>
-       </div>
-     );
-   }
+1. **Altere** a coleção/global em `backend/cms/src/collections` ou `src/globals`.
+2. **Gere tipos e migração** (com o Postgres local no ar):
+   ```bash
+   cd backend/cms
+   npm run generate:types
+   npm run payload migrate:create -- descricao_curta
    ```
-3. Acesse `http://localhost:3000/sobre-o-telescopio` no navegador!
+   Revise o arquivo novo em `src/migrations/` (ele também é registrado em `index.ts`).
+3. **Aplique e teste** localmente: `npm run payload migrate` e `npm run dev`.
+4. **Abra um Pull Request** incluindo a migração. Nunca edite uma migração que já foi para produção: crie outra.
+5. **Merge** → a Vercel faz o deploy. O *Build Command* `npm run ci` executa `payload migrate && next build`: as migrações pendentes rodam no Neon antes do build.
+
+> ⚠️ O projeto do CMS **não gera Preview Deployments**: o *Ignored Build Step* (`[ "$VERCEL_ENV" != "production" ]`) cancela builds que não sejam de produção, e Neon e Blob estão conectados só ao ambiente Production. Motivo: um Preview rodaria `payload migrate` no mesmo banco da produção, aplicando a migração de um PR **antes** do merge. Valide migrações localmente (passo 3).
+
+Edições de **conteúdo** (textos, imagens, publicação) são feitas no `/admin` e não passam por PR.
 
 ---
 
-## Como Criar um Novo Componente
+## Publicação na Vercel
 
-1. Crie o arquivo em `src/components/ui/` ou `src/components/astronomy/`.
-2. Exemplo de um botão de alerta:
-   ```tsx
-   import React from "react";
+Três projetos no plano Hobby, todos ligados a este repositório:
 
-   interface AlertaProps {
-     mensagem: string;
-   }
+| Projeto | Root Directory | Framework | Build Command |
+| --- | --- | --- | --- |
+| `observatorio-otto-cms` | `backend/cms` | Next.js (Node 22) | `npm run ci` |
+| `observatorio-otto-api` | `backend/api_python` | FastAPI (detectado por `main.py` com `app`) | — |
+| `observatorio-otto-site` | `frontend` | Next.js | padrão |
 
-   export function AlertaAstronomico({ mensagem }: AlertaProps) {
-     return (
-       <div className="rounded-xl border border-aurora-green/30 bg-aurora-green/10 p-4 text-aurora-green text-sm font-mono">
-         <span>✨ {mensagem}</span>
-       </div>
-     );
-   }
-   ```
+1. **Neon (Marketplace):** plano **Free**, região `iad1`, conectado ao Production do CMS (injeta `DATABASE_URL`).
+2. **Blob:** store **público** (o plugin do Payload só suporta acesso público) conectado ao Production do CMS.
+3. **Variáveis:** conforme as tabelas acima. `ALLOWED_ORIGINS` do CMS e da API recebem a URL do site.
+4. **Logo após o primeiro deploy do CMS, abra `/admin` e crie o primeiro usuário** — enquanto não existir nenhum, qualquer pessoa que acessar a tela vira administradora.
+
+A função da API **não pode baixar nem gravar arquivos**: por isso `backend/api_python/data/de421.bsp` é versionado (~17 MB) e o Skyfield só o lê. Para regenerar (raro): baixe `https://ssd.jpl.nasa.gov/ftp/eph/planets/bsp/de421.bsp` para essa pasta.
 
 ---
 
-## Como Consumir uma Nova Rota da API
+## Pendências
 
-1. Adicione a chamada no serviço correspondente (ex: `src/features/sky-today/services/`):
-   ```ts
-   async getCometasVisiveis() {
-     const { data } = await fastapiClient.get("/cometas");
-     return data;
-   }
-   ```
-2. Crie um Hook com TanStack Query:
-   ```ts
-   export function useCometas() {
-     return useQuery({
-       queryKey: ["cometas"],
-       queryFn: () => fastapiAstroService.getCometasVisiveis(),
-     });
-   }
-   ```
-3. Use direto no seu componente React:
-   ```tsx
-   const { data: cometas, isLoading } = useCometas();
-   ```
+- [ ] **Voltar a Production Branch para `main`.** Nos **três** projetos da Vercel (`observatorio-otto-cms`, `-api` e `-site`) a *Production Branch* está temporariamente em **`melquidev-vercel`**. Depois de validar, faça o merge de `melquidev-vercel` na `main` e volte a Production Branch para `main` (*Settings → Environments → Production → Branch Tracking*, ou *Settings → Git → Production Branch*); confira que o deploy seguinte, a partir da `main`, passa.
+- [ ] Definir `ALLOWED_ORIGINS` (CMS e API) com a URL real do site e confirmar `CMS_URL` / `NEXT_PUBLIC_CMS_URL` com o domínio final do CMS.
+- [ ] As migrações do CMS são duas (`inicial` e `eventos_noticias`); podem ser unificadas numa só antes do primeiro deploy real, enquanto o banco do Neon ainda está vazio.
+- [ ] `npm audit` do frontend ainda aponta o `postcss` embutido no Next 15 (afeta só o build; a correção exige Next 16).
 
 ---
 
-## Solução de Problemas Comuns (FAQ)
+## Solução de problemas
 
-### 1. O projeto não inicia (`npm run dev` dá erro)
-* Verifique se você está na pasta `frontend` e não na pasta raiz do projeto.
-* Apague a pasta `node_modules` e o arquivo `.next`, depois execute `npm install` novamente.
-
-### 2. Os planetas aparecem, mas dizem "Consultando..."
-* O front-end tentou conectar com a FastAPI na porta 8000. Se ela não estiver rodando, em cerca de 2 segundos ele ativará os dados de fallback automaticamente.
-
-### 3. Erro de CORS no console
-* Isso ocorre se o backend não permitir conexões do `http://localhost:3000`. No seu arquivo da FastAPI (`main.py`), garanta que o middleware de CORS permita a origem do front-end.
-
-### 4. Build de produção falhando (`npm run build`)
-* O TypeScript é rigoroso: confira se não há imports de arquivos que foram apagados ou erros de tipagem apontados no terminal.
-
----
-
-## Contribuindo com o Projeto
-
-* **Mantenha a linguagem humana:** Evite adicionar jargões complicados para o usuário final.
-* **Mobile First:** Ao criar um novo componente, teste primeiro em tela de smartphone (375px) antes de testar em monitor ultrawide.
-* **Componentes pequenos:** Se um componente passar de 250 linhas, considere quebrar partes dele em subcomponentes menores.
+- **`autenticação do tipo senha falhou` ao migrar/rodar o CMS:** provavelmente há outro Postgres na porta 5432 do seu computador. Use `POSTGRES_PORT=5433` (veja acima).
+- **`401` na FastAPI com token válido:** confira `CMS_URL` e se o cabeçalho é `Authorization: JWT <token>` (`Bearer <token>` também funciona).
+- **Erro de CORS no navegador:** inclua a origem exata do site (com `https://`, sem barra final) em `ALLOWED_ORIGINS` do CMS e da API.
+- **Site mostra "agenda indisponível" ou texto de reserva:** o CMS não respondeu; confira `NEXT_PUBLIC_CMS_URL` e se o CMS está no ar. A página se atualiza sozinha a cada 60 s.
 
 ---
 

@@ -60,7 +60,7 @@ async function runAudit() {
 
     for (const vp of VIEWPORTS) {
       await page.setViewportSize({ width: vp.width, height: vp.height });
-      const fullUrl = `http://localhost:3000${pageItem.path}`;
+      const fullUrl = `http://localhost:3001${pageItem.path}`;
 
       let response;
       try {

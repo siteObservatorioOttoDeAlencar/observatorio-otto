@@ -1,15 +1,15 @@
-# Dependencies
+# Segredos (use os arquivos .env.example como modelo)
+.env
+.env.local
+.env*.local
+
+# Dependências
 node_modules/
 **/node_modules/
 venv/
-**/venv/
+.venv/
 
-# Environment Variables
-.env
-.env*.local
-*.env
-
-# Next.js & Frontend Build Outputs
+# Next.js e frontend (build)
 .next/
 **/.next/
 out/
@@ -18,24 +18,21 @@ dist/
 *.tsbuildinfo
 audit-report.json
 
-# Strapi
-strapi/app/.cache/
-backend/strapi/app/.cache/
-*strapi-log.txt
-strapi/app/src/admin/webpack.config.example.js
-backend/strapi/app/src/admin/webpack.config.example.js
-
-# Python & Backend
+# Python
 __pycache__/
 **/__pycache__/
 *.pyc
-de421.bsp
-**/de421.bsp
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
 .coverage
 htmlcov/
+
+# Uploads locais do CMS (sem Vercel Blob)
+backend/cms/media/
+
+# Vercel
+.vercel/
 
 # Logs
 *.log
@@ -43,6 +40,6 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# System
+# Sistema
 .DS_Store
 Thumbs.db

@@ -3,40 +3,22 @@ ARQUIVO CONTROLLER / ROUTER (FastAPI)
 
 Centraliza os endpoints da API própria do Observatório Otto de Alencar.
 Organiza as rotas públicas (como efemérides astronômicas) e rotas protegidas
-(que exigem o token JWT de usuários logados via Strapi).
-'''
-import logging
+(que exigem login no CMS Payload e um perfil permitido).
 
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import text
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import Session
+O conteúdo editorial (início, eventos, notícias...) NÃO passa por aqui: o
+frontend lê direto do CMS (/api/<coleção> e /api/globals/<global>).
+'''
+from typing import Annotated
+
+from fastapi import APIRouter, Depends
 
 from astronomia import o_que_observar_hoje  # Módulo de serviço astronômico local
-from auth import get_db, usuario_autenticado
-
-logger = logging.getLogger(__name__)
+from auth import exige_perfil
 
 router = APIRouter()
 
-_EVENTOS_QUERY = text(
-    """
-    SELECT
-        eventos.*,
-        COALESCE(
-            (
-                SELECT array_agg(files.url ORDER BY relation."order", files.id)
-                FROM files_related_morphs AS relation
-                INNER JOIN files ON files.id = relation.file_id
-                WHERE relation.related_id = eventos.id
-                    AND relation.related_type = 'api::evento.evento'
-                    AND relation.field = 'Imagem'
-            ),
-            ARRAY[]::text[]
-        ) AS imagem_urls
-    FROM eventos
-    """
-)
+# Perfis (definidos no CMS) que podem registrar observações.
+PERFIS_REGISTRO_OBSERVACAO = ("observacao", "coordenador", "administrador")
 
 
 @router.get("/health")
@@ -52,11 +34,11 @@ async def health():
 async def observar_hoje():
     """
     Recurso interativo principal: 'O que observar no céu de Fortaleza hoje?'.
-    
+
     Esta rota é pública e consumida diretamente:
     1. Pelo Cockpit dos 5 segundos na Home do Front-End.
     2. Pelo Radar Polar interativo na página '/ceu-hoje'.
-    
+
     Retorna os planetas visíveis com direções cardeais humanas,
     fase da lua calculada e resumo de condições de observação.
     """
@@ -65,34 +47,15 @@ async def observar_hoje():
 
 @router.post("/registros-observacao")
 async def criar_registro_observacao(
-    usuario: dict = Depends(usuario_autenticado),
+    usuario: Annotated[dict, Depends(exige_perfil(*PERFIS_REGISTRO_OBSERVACAO))],
 ):
     """
-    Exemplo de rota protegida.
-    Exige o cabeçalho 'Authorization: Bearer <token_do_strapi>'.
-    Se o token for válido, o parâmetro 'usuario' contém o ID e dados do autor.
+    Rota protegida: exige login no CMS (o cabeçalho Authorization é repassado
+    ao Payload) e perfil observacao, coordenador ou administrador.
+    Sem login → 401; perfil não permitido → 403.
     """
-    return {"mensagem": "Endpoint a implementar", "usuario_id": usuario.get("id")}
-
-@router.get("/eventos", dependencies=[Depends(usuario_autenticado)])
-def listar_eventos(banco: Session = Depends(get_db)) -> list[dict[str, object]]:
-    """
-    Endpoint protegido para listar eventos astronômicos.
-    Exige autenticação via token JWT.
-    """
-    try:
-        eventos = banco.execute(_EVENTOS_QUERY).mappings().all()
-        resposta = []
-        for evento in eventos:
-            registro = dict(evento)
-            urls = registro.pop("imagem_urls") or []
-            registro["imagem_url"] = urls[0] if urls else None
-            registro["imagem_urls"] = urls
-            resposta.append(registro)
-        return resposta
-    except SQLAlchemyError as exc:
-        logger.exception("Falha ao consultar eventos no banco de dados")
-        raise HTTPException(
-            status_code=500,
-            detail="Erro ao consultar eventos.",
-        ) from exc
+    return {
+        "mensagem": "Endpoint a implementar",
+        "usuario_id": usuario.get("id"),
+        "perfil": usuario.get("perfil"),
+    }

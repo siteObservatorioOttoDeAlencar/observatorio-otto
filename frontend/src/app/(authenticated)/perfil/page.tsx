@@ -37,10 +37,10 @@ export default function PerfilPage() {
             Nenhuma Sessão Ativa
           </h2>
           <p className="text-xs text-space-text-muted">
-            Faça login com sua conta Strapi para visualizar seu perfil astronômico e gerenciar seus diários.
+            Faça login para visualizar seu perfil astronômico e gerenciar seus diários.
           </p>
           <div className="pt-2">
-            <Link href="/auth/login">
+            <Link href="/login">
               <Button variant="primary" className="w-full">
                 Entrar no Observatório
               </Button>
@@ -67,7 +67,7 @@ export default function PerfilPage() {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="font-display text-2xl sm:text-3xl font-bold text-lunar-silver">
-                {user.username}
+                {user.email.split("@")[0]}
               </h1>
               <Badge variant="visible">Ativo</Badge>
             </div>
@@ -76,7 +76,7 @@ export default function PerfilPage() {
             </p>
             <div className="flex items-center gap-2 mt-2 text-xs font-mono text-space-text-muted">
               <ShieldCheck className="h-3.5 w-3.5 text-aurora-green" />
-              <span>Autenticado via Strapi JWT v4/v5</span>
+              <span>Autenticado via CMS (JWT) — perfil: {user.perfil}</span>
             </div>
           </div>
         </div>
@@ -158,12 +158,12 @@ export default function PerfilPage() {
         </div>
 
         <p className="text-xs text-space-text-muted">
-          Seu token de acesso assinado pelo Strapi é transmitido com segurança via cabeçalho HTTP Bearer
+          Seu token de acesso, emitido pelo CMS, é transmitido com segurança via cabeçalho HTTP Authorization
           para validar requisições protegidas na API FastAPI do observatório.
         </p>
 
         <div className="rounded-xl bg-space-surface-2 p-3 font-mono text-[11px] text-space-text-muted break-all border border-space-border/60">
-          <span className="text-nebula-cyan">Bearer JWT:</span> {token ? `${token.substring(0, 36)}...` : "Não disponível"}
+          <span className="text-nebula-cyan">JWT:</span> {token ? `${token.substring(0, 36)}...` : "Não disponível"}
         </div>
       </div>
     </div>

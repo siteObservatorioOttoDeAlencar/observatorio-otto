@@ -1,17 +1,22 @@
 """
 Cálculos astronômicos locais (sem depender de API externa), usando Skyfield.
-Na primeira execução, o Skyfield baixa o arquivo de efemérides 'de421.bsp'
-(dados JPL/NASA, ~17MB) e guarda em cache local — depois disso funciona offline.
+O arquivo de efemérides 'de421.bsp' (dados JPL/NASA, ~17MB) é versionado em
+api_python/data/. Na Vercel a função não pode baixar nem gravar arquivos, então
+o Skyfield apenas LÊ esse arquivo local (nunca baixa).
 """
 # ARQUIVO SERVICE DE ASTRONOMIA
 import os
 from datetime import datetime
-from skyfield.api import load, wgs84
+from pathlib import Path
+
+from skyfield.api import Loader, wgs84
 from skyfield import almanac
 
 # Coordenadas geográficas oficiais de Fortaleza - CE
 LAT = float(os.getenv("OBSERVATORIO_LAT", "-3.7793"))
 LON = float(os.getenv("OBSERVATORIO_LON", "-38.5661"))
+
+DIRETORIO_DADOS = Path(__file__).resolve().parent / "data"
 
 _ts = None
 _eph = None
@@ -24,8 +29,10 @@ def _carregar_efemerides():
     """
     global _ts, _eph
     if _ts is None:
-        _ts = load.timescale()
-        _eph = load("de421.bsp")
+        # expire=False: nunca tenta atualizar/baixar arquivos; só lê de data/.
+        loader = Loader(str(DIRETORIO_DADOS), verbose=False, expire=False)
+        _ts = loader.timescale()
+        _eph = loader("de421.bsp")
     return _ts, _eph
 
 

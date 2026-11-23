@@ -1,41 +1,90 @@
 """
-Valida o JWT emitido pelo Strapi. A API própria não tem sistema de login
-próprio — ela confia no mesmo segredo (STRAPI_JWT_SECRET) usado pelo Strapi
-para assinar os tokens.
+Autenticação via Payload CMS.
+
+A API própria não tem login nem segredo de JWT: ela repassa o cabeçalho
+`Authorization` recebido para `GET {CMS_URL}/api/users/me`. Se o CMS devolver
+um `user`, a requisição está autenticada e o perfil vem em `user.perfil`.
+
+O frontend deve enviar o mesmo cabeçalho que usaria com o CMS
+(no Payload, `Authorization: JWT <token>`).
 """
 import os
-from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from jose import JWTError, jwt
+from typing import Annotated
 
-from database import get_db as get_db
+import httpx
+from fastapi import Depends, Header, HTTPException, status
 
-STRAPI_JWT_SECRET = os.getenv("STRAPI_JWT_SECRET", "troque_este_segredo")
-ALGORITHM = "HS256"
+TIMEOUT_CMS_SEGUNDOS = 5.0
 
-bearer_scheme = HTTPBearer(auto_error=False)
+
+def _cms_url() -> str:
+    url = os.getenv("CMS_URL", "").strip().rstrip("/")
+    if not url:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Autenticação indisponível: CMS_URL não configurada.",
+        )
+    return url
 
 
 async def usuario_autenticado(
-    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+    authorization: Annotated[str | None, Header()] = None,
 ) -> dict:
     """
-    Dependency do FastAPI para proteger rotas que exigem login.
-    Uso: @app.post("/algo", dependencies=[Depends(usuario_autenticado)])
-    ou capturando o payload: user = Depends(usuario_autenticado)
+    Dependência para rotas que exigem login. Devolve o usuário do CMS
+    (com `id`, `email` e `perfil`). Sem usuário válido → 401.
     """
-    if credentials is None:
+    if not authorization:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token não fornecido",
+            detail="Cabeçalho Authorization não fornecido.",
         )
+
+    url = f"{_cms_url()}/api/users/me"
     try:
-        payload = jwt.decode(
-            credentials.credentials, STRAPI_JWT_SECRET, algorithms=[ALGORITHM]
+        async with httpx.AsyncClient(timeout=TIMEOUT_CMS_SEGUNDOS) as client:
+            resposta = await client.get(url, headers={"Authorization": authorization})
+    except httpx.HTTPError:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Não foi possível validar o login no CMS.",
         )
-        return payload  # contém id do usuário no Strapi
-    except JWTError:
+
+    if resposta.status_code >= 500:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="O CMS falhou ao validar o login.",
+        )
+
+    try:
+        usuario = resposta.json().get("user") if resposta.status_code == 200 else None
+    except ValueError:
+        usuario = None
+
+    if not usuario:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token inválido ou expirado",
+            detail="Token inválido ou expirado.",
         )
+    return usuario
+
+
+def exige_perfil(*perfis_permitidos: str):
+    """
+    Fábrica de dependência: exige login e um dos perfis informados.
+    Usuário autenticado com outro perfil → 403.
+
+    Uso: Depends(exige_perfil("coordenador", "administrador"))
+    """
+
+    async def dependencia(
+        usuario: Annotated[dict, Depends(usuario_autenticado)],
+    ) -> dict:
+        if usuario.get("perfil") not in perfis_permitidos:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Seu perfil não tem permissão para esta ação.",
+            )
+        return usuario
+
+    return dependencia

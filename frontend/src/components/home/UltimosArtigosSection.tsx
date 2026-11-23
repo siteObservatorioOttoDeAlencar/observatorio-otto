@@ -5,7 +5,7 @@ import { Container } from "@/components/layout/Container";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 
-// Exemplos enriquecidos de artigos astronômicos enquanto integramos com o Strapi
+// Exemplos enriquecidos de artigos astronômicos enquanto o conteúdo editorial é publicado no CMS
 const ARTIGOS_EM_DESTAQUE = [
   {
     id: 1,

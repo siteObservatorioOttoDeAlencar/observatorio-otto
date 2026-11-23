@@ -82,7 +82,7 @@ export default function RegistrosFeedPage() {
           </p>
         </div>
 
-        <Link href={isAuthenticated ? "/registros/novo" : "/auth/login"}>
+        <Link href={isAuthenticated ? "/registros/novo" : "/login"}>
           <Button variant="primary" className="gap-2 shadow-cosmic-sm shrink-0">
             <PlusCircle className="h-4 w-4" />
             <span>Novo Registro</span>

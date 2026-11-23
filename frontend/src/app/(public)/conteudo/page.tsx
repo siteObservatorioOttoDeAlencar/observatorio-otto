@@ -4,86 +4,78 @@ import * as React from "react";
 import Link from "next/link";
 import { BookOpen, Search, Calendar, Clock, ArrowRight, Sparkles, Filter } from "lucide-react";
 import { useArticles } from "@/features/content/hooks/useArticles";
+import type { Artigo } from "@/features/content/types";
 import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
 import { Skeleton } from "@/components/ui/Skeleton";
 
-// Artigos de acervo científico base do Observatório
-const STATIC_FALLBACK_ARTICLES = [
+// Acervo de reserva: aparece quando o CMS não responde ou ainda não tem artigos publicados.
+const STATIC_FALLBACK_ARTICLES: Artigo[] = [
   {
     id: 1,
-    attributes: {
-      titulo: "Otto de Alencar e o Teste da Teoria da Relatividade Geral em Sobral (1919)",
-      slug: "otto-de-alencar-relatividade-sobral-1919",
-      resumo: "Como o eminente matemático cearense analisou o eclipse total do Sol e influenciou o rigor das medições astronômicas no Brasil.",
-      categoria: "História da Ciência",
-      tempoLeitura: "9 min",
-      publishedAt: "2026-09-28T14:00:00Z",
-      capaUrl: "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?q=80&w=1000&auto=format&fit=crop",
-      autor: "Prof. Dr. Marcelo Vasconcelos",
-    },
+    titulo: "Otto de Alencar e o Teste da Teoria da Relatividade Geral em Sobral (1919)",
+    slug: "otto-de-alencar-relatividade-sobral-1919",
+    resumo: "Como o eminente matemático cearense analisou o eclipse total do Sol e influenciou o rigor das medições astronômicas no Brasil.",
+    categoria: "História da Ciência",
+    tempoLeitura: "9 min",
+    publicadoEm: "2026-09-28T14:00:00Z",
+    capaUrl: "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?q=80&w=1000&auto=format&fit=crop",
+    autor: "Prof. Dr. Marcelo Vasconcelos",
   },
   {
     id: 2,
-    attributes: {
-      titulo: "Fotometria Lunar e o Efeito de Oposição em Solo Equatorial",
-      slug: "fotometria-lunar-efeito-oposicao",
-      resumo: "Análise da refletância da poeira regolitica nos mares lunares durante a fase de Lua Cheia capturada por sensores CMOS em Fortaleza.",
-      categoria: "Astrofísica",
-      tempoLeitura: "12 min",
-      publishedAt: "2026-10-02T10:30:00Z",
-      capaUrl: "https://images.unsplash.com/photo-1522030299830-16b8d3d049fe?q=80&w=1000&auto=format&fit=crop",
-      autor: "Laboratório de Ótica Quântica",
-    },
+    titulo: "Fotometria Lunar e o Efeito de Oposição em Solo Equatorial",
+    slug: "fotometria-lunar-efeito-oposicao",
+    resumo: "Análise da refletância da poeira regolitica nos mares lunares durante a fase de Lua Cheia capturada por sensores CMOS em Fortaleza.",
+    categoria: "Astrofísica",
+    tempoLeitura: "12 min",
+    publicadoEm: "2026-10-02T10:30:00Z",
+    capaUrl: "https://images.unsplash.com/photo-1522030299830-16b8d3d049fe?q=80&w=1000&auto=format&fit=crop",
+    autor: "Laboratório de Ótica Quântica",
   },
   {
     id: 3,
-    attributes: {
-      titulo: "Cartografia de Planetas Exteriores: A Dinâmica das Faixas Jovianas",
-      slug: "cartografia-planetas-exteriores-faixas-jovianas",
-      resumo: "Registro das variações cromáticas na Zona Equatorial de Júpiter e trânsito da Grande Mancha Vermelha com telescópios catadióptricos.",
-      categoria: "Observacional",
-      tempoLeitura: "7 min",
-      publishedAt: "2026-10-06T18:00:00Z",
-      capaUrl: "https://images.unsplash.com/photo-1614728894747-a83421e2b9c9?q=80&w=1000&auto=format&fit=crop",
-      autor: "Grupo de Astrofotografia Cearense",
-    },
+    titulo: "Cartografia de Planetas Exteriores: A Dinâmica das Faixas Jovianas",
+    slug: "cartografia-planetas-exteriores-faixas-jovianas",
+    resumo: "Registro das variações cromáticas na Zona Equatorial de Júpiter e trânsito da Grande Mancha Vermelha com telescópios catadióptricos.",
+    categoria: "Observacional",
+    tempoLeitura: "7 min",
+    publicadoEm: "2026-10-06T18:00:00Z",
+    capaUrl: "https://images.unsplash.com/photo-1614728894747-a83421e2b9c9?q=80&w=1000&auto=format&fit=crop",
+    autor: "Grupo de Astrofotografia Cearense",
   },
   {
     id: 4,
-    attributes: {
-      titulo: "Calibração e Alinhamento Polar em Latitudes Equatoriais Baixas",
-      slug: "calibracao-alinhamento-polar-latitudes-baixas",
-      resumo: "Desafios específicos do alinhamento preciso de montagens equatoriais alemãs em Fortaleza (-3.77°), onde o polo celeste está próximo ao horizonte.",
-      categoria: "Instrumentação",
-      tempoLeitura: "15 min",
-      publishedAt: "2026-10-08T09:15:00Z",
-      capaUrl: "https://images.unsplash.com/photo-1516339901601-2e1b62dc0c45?q=80&w=1000&auto=format&fit=crop",
-      autor: "Eng. Ricardo Peixoto",
-    },
+    titulo: "Calibração e Alinhamento Polar em Latitudes Equatoriais Baixas",
+    slug: "calibracao-alinhamento-polar-latitudes-baixas",
+    resumo: "Desafios específicos do alinhamento preciso de montagens equatoriais alemãs em Fortaleza (-3.77°), onde o polo celeste está próximo ao horizonte.",
+    categoria: "Instrumentação",
+    tempoLeitura: "15 min",
+    publicadoEm: "2026-10-08T09:15:00Z",
+    capaUrl: "https://images.unsplash.com/photo-1516339901601-2e1b62dc0c45?q=80&w=1000&auto=format&fit=crop",
+    autor: "Eng. Ricardo Peixoto",
   },
 ];
 
 export default function ConteudoPage() {
-  const { data: strapiResponse, isLoading } = useArticles();
+  const { data: artigosDoCms, isLoading } = useArticles();
   const [busca, setBusca] = React.useState("");
   const [categoriaAtiva, setCategoriaAtiva] = React.useState("Todos");
 
-  // Combina artigos reais da API Strapi com o acervo editorial curado
-  const articles = React.useMemo(() => {
-    if (strapiResponse?.data && Array.isArray(strapiResponse.data) && strapiResponse.data.length > 0) {
-      return strapiResponse.data;
-    }
-    return STATIC_FALLBACK_ARTICLES as any;
-  }, [strapiResponse]);
+  // Artigos publicados no CMS; sem eles (CMS fora do ar ou vazio), usa o acervo de reserva
+  const articles: Artigo[] = React.useMemo(() => {
+    if (artigosDoCms && artigosDoCms.length > 0) return artigosDoCms;
+    return STATIC_FALLBACK_ARTICLES;
+  }, [artigosDoCms]);
 
   const artigosFiltrados = React.useMemo(() => {
-    return articles.filter((art: any) => {
+    const termo = busca.toLowerCase();
+    return articles.filter((art) => {
       const matchBusca =
-        art.attributes.titulo.toLowerCase().includes(busca.toLowerCase()) ||
-        (art.attributes.resumo && art.attributes.resumo.toLowerCase().includes(busca.toLowerCase()));
-      const matchCategoria =
-        categoriaAtiva === "Todos" || art.attributes.categoria === categoriaAtiva;
+        art.titulo.toLowerCase().includes(termo) ||
+        art.resumo.toLowerCase().includes(termo) ||
+        art.autor.toLowerCase().includes(termo);
+      const matchCategoria = categoriaAtiva === "Todos" || art.categoria === categoriaAtiva;
       return matchBusca && matchCategoria;
     });
   }, [articles, busca, categoriaAtiva]);
@@ -142,7 +134,7 @@ export default function ConteudoPage() {
       </div>
 
       {/* Grid de Artigos com Destaque Editorial */}
-      {isLoading && !articles ? (
+      {isLoading && !artigosDoCms ? (
         <div className="space-y-6">
           <Skeleton className="h-64 rounded-2xl" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -159,31 +151,31 @@ export default function ConteudoPage() {
                 <div className="lg:col-span-8 space-y-3">
                   <div className="flex items-center gap-2 text-xs font-mono text-space-text-muted">
                     <Badge variant="subtle" className="text-nebula-cyan border-nebula-cyan/30 text-[11px]">
-                      {artigosFiltrados[0].attributes.categoria || "História da Ciência"}
+                      {artigosFiltrados[0].categoria}
                     </Badge>
                     <span>•</span>
                     <span className="text-aurora-green font-medium">Ensaio em Destaque</span>
                     <span>•</span>
                     <div className="flex items-center gap-1 text-space-text-muted">
                       <Clock className="h-3 w-3" />
-                      <span>{artigosFiltrados[0].attributes.tempoLeitura}</span>
+                      <span>{artigosFiltrados[0].tempoLeitura}</span>
                     </div>
                   </div>
 
-                  <Link href={`/conteudo/${artigosFiltrados[0].attributes.slug}`}>
+                  <Link href={`/conteudo/${artigosFiltrados[0].slug}`}>
                     <h2 className="font-display text-xl sm:text-2xl md:text-3xl font-bold text-space-text group-hover:text-nebula-cyan transition-colors leading-snug">
-                      {artigosFiltrados[0].attributes.titulo}
+                      {artigosFiltrados[0].titulo}
                     </h2>
                   </Link>
 
                   <p className="text-xs sm:text-sm text-space-text-muted leading-relaxed line-clamp-2 max-w-3xl">
-                    {artigosFiltrados[0].attributes.resumo}
+                    {artigosFiltrados[0].resumo}
                   </p>
 
                   <div className="pt-2 flex items-center justify-between text-xs font-mono text-space-text-muted">
-                    <span>{artigosFiltrados[0].attributes.autor}</span>
+                    <span>{artigosFiltrados[0].autor}</span>
                     <Link
-                      href={`/conteudo/${artigosFiltrados[0].attributes.slug}`}
+                      href={`/conteudo/${artigosFiltrados[0].slug}`}
                       className="inline-flex items-center gap-1.5 font-medium text-nebula-cyan group-hover:translate-x-1 transition-transform"
                     >
                       <span>Ler Ensaio Completo</span>
@@ -192,12 +184,14 @@ export default function ConteudoPage() {
                   </div>
                 </div>
 
-                <div className="lg:col-span-4 h-48 lg:h-52 rounded-xl overflow-hidden border border-white/[0.08] relative">
-                  <img
-                    src={artigosFiltrados[0].attributes.capaUrl}
-                    alt={artigosFiltrados[0].attributes.titulo}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
+                <div className="lg:col-span-4 h-48 lg:h-52 rounded-xl overflow-hidden border border-white/[0.08] relative bg-space-surface-2">
+                  {artigosFiltrados[0].capaUrl && (
+                    <img
+                      src={artigosFiltrados[0].capaUrl}
+                      alt={artigosFiltrados[0].titulo}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-space-background/80 via-transparent to-transparent" />
                 </div>
               </div>
@@ -206,8 +200,8 @@ export default function ConteudoPage() {
 
           {/* Grid dos Demais Artigos */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {artigosFiltrados.slice(1).map((art: any) => {
-              const { titulo, slug, resumo, categoria, tempoLeitura, autor } = art.attributes;
+            {artigosFiltrados.slice(1).map((art) => {
+              const { titulo, slug, resumo, categoria, tempoLeitura, autor } = art;
               return (
                 <article
                   key={art.id}

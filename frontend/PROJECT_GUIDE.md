@@ -37,7 +37,7 @@ Para não se perder na árvore de diretórios:
 | **Mudar os textos da página inicial** | `src/components/home/` | `HeroStatusCockpit.tsx`, `ParaOndeOlhar.tsx` |
 | **Ajustar botões, cards ou badges padrão** | `src/components/ui/` | `Button.tsx`, `Badge.tsx`, `Card.tsx` |
 | **Alterar as chamadas para a FastAPI** | `src/features/sky-today/` | `services/fastapiAstroService.ts` |
-| **Alterar as chamadas para o Strapi CMS** | `src/features/content/` | `services/strapiContentService.ts` |
+| **Alterar as chamadas para o CMS (Payload)** | `src/features/content/` | `services/cmsContentService.ts` |
 | **Mudar a URL da API ou latitude de Fortaleza** | `src/lib/constants.ts` | `API_CONFIG`, `OBSERVATORIO_CONFIG` |
 | **Mudar as cores principais do site** | `src/styles/globals.css` | `--space-background`, `--nebula-cyan` |
 
@@ -61,10 +61,11 @@ Para não se perder na árvore de diretórios:
   };
   ```
 
-### "Quero mudar a URL de onde a API responde"
+### "Quero mudar a URL de onde a API e o CMS respondem"
 * Abra o arquivo `.env.local` na raiz de `frontend/`:
   ```env
-  NEXT_PUBLIC_FASTAPI_URL=http://localhost:8000
+  NEXT_PUBLIC_API_URL=http://localhost:8000
+  NEXT_PUBLIC_CMS_URL=http://localhost:3000
   ```
 * Se for para produção, basta trocar pelo endereço do servidor remoto!
 

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Telescope, ArrowLeft, AlertCircle } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { LoginForm } from "@/features/auth/components/LoginForm";
+import { mensagemDeErroDeLogin } from "@/features/auth/services/authService";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -18,22 +19,19 @@ export default function LoginPage() {
 
     const form = e.currentTarget as HTMLFormElement;
     const formData = new FormData(form);
-    const identifier = formData.get("identifier") as string;
+    const email = (formData.get("email") as string)?.trim();
     const password = formData.get("password") as string;
 
-    if (!identifier || !password) {
+    if (!email || !password) {
       setErrorMessage("Por favor, preencha todos os campos.");
       return;
     }
 
     try {
-      await login({ identifier, password });
+      await login({ email, password });
       router.push("/perfil");
-    } catch (err: any) {
-      const msg =
-        err?.response?.data?.error?.message ||
-        "Identificador ou senha incorretos. Verifique suas credenciais.";
-      setErrorMessage(msg);
+    } catch (err: unknown) {
+      setErrorMessage(mensagemDeErroDeLogin(err));
     }
   };
 
@@ -48,7 +46,7 @@ export default function LoginPage() {
           <span>Voltar à Capa</span>
         </Link>
         <span className="text-[10px] font-mono uppercase tracking-wider text-space-text-muted">
-          Auth Strapi JWT
+          Login via CMS
         </span>
       </div>
 
@@ -60,7 +58,7 @@ export default function LoginPage() {
           Acesso ao Observatório
         </h1>
         <p className="text-xs text-space-text-muted">
-          Entre com seu e-mail ou nome de astrônomo para registrar sessões de observação
+          Entre com seu e-mail e senha para registrar sessões de observação
         </p>
       </div>
 
@@ -75,13 +73,7 @@ export default function LoginPage() {
 
       <div className="text-center pt-2 border-t border-space-border/60">
         <p className="text-xs text-space-text-muted">
-          Ainda não possui credencial astronômica?{" "}
-          <Link
-            href="/auth/cadastro"
-            className="text-nebula-cyan hover:underline font-medium ml-1"
-          >
-            Cadastrar-se
-          </Link>
+          Para ter acesso, solicite a um administrador.
         </p>
       </div>
     </div>

@@ -78,14 +78,14 @@ export function FinalCtaSection() {
             </p>
           </div>
 
-          {/* Atalhos Secundários para Visita e Cadastro */}
+          {/* Atalhos Secundários para Visita e Acesso */}
           <div className="mt-12 pt-8 border-t border-space-border/40 flex flex-wrap items-center justify-center gap-6 text-xs font-mono text-space-text-muted">
             <Link href="/sobre" className="hover:text-nebula-cyan transition-colors">
               Agendar Visita ao Observatório →
             </Link>
             <span className="text-space-border">•</span>
-            <Link href="/auth/cadastro" className="hover:text-nebula-cyan transition-colors">
-              Criar Conta de Pesquisador →
+            <Link href="/contato" className="hover:text-nebula-cyan transition-colors">
+              Solicitar Acesso de Pesquisador →
             </Link>
           </div>
         </div>

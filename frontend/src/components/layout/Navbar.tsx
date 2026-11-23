@@ -115,7 +115,7 @@ export function Navbar() {
               <div className="flex items-center gap-2 rounded-lg border border-space-border bg-space-surface-1 px-3 py-1.5 text-xs">
                 <User className="h-3.5 w-3.5 text-nebula-cyan" />
                 <span className="font-medium text-lunar-silver max-w-[100px] truncate">
-                  {user.username}
+                  {user.email.split("@")[0]}
                 </span>
                 <button
                   onClick={() => logout()}
@@ -128,15 +128,10 @@ export function Navbar() {
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <Link href="/auth/login">
+              <Link href="/login">
                 <Button variant="glass" size="sm" className="gap-2">
                   <LogIn className="h-4 w-4 text-nebula-cyan" />
                   Entrar
-                </Button>
-              </Link>
-              <Link href="/auth/cadastro">
-                <Button variant="primary" size="sm">
-                  Registrar-se
                 </Button>
               </Link>
             </div>
@@ -184,7 +179,7 @@ export function Navbar() {
             {isAuthenticated && user ? (
               <div className="space-y-3">
                 <div className="flex items-center justify-between text-xs text-space-text-muted px-1">
-                  <span>Conectado como <strong className="text-lunar-silver">{user.username}</strong></span>
+                  <span>Conectado como <strong className="text-lunar-silver">{user.email.split("@")[0]}</strong></span>
                   <button
                     onClick={() => logout()}
                     className="text-crimson-deep hover:underline flex items-center gap-1"
@@ -200,16 +195,11 @@ export function Navbar() {
                 </Link>
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-2">
-                <Link href="/auth/login" className="w-full">
+              <div className="grid grid-cols-1 gap-2">
+                <Link href="/login" className="w-full">
                   <Button variant="glass" className="w-full gap-1.5">
                     <LogIn className="h-4 w-4 text-nebula-cyan" />
                     Entrar
-                  </Button>
-                </Link>
-                <Link href="/auth/cadastro" className="w-full">
-                  <Button variant="primary" className="w-full">
-                    Registrar-se
                   </Button>
                 </Link>
               </div>

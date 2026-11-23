@@ -44,9 +44,14 @@ export default function NovoRegistroPage() {
         router.push("/registros");
       }, 1500);
     } catch (err: any) {
+      const status = err?.response?.status;
       setFormError(
-        err?.response?.data?.detail ||
-          "Não foi possível registrar a observação no servidor FastAPI. Verifique a autenticação."
+        status === 403
+          ? "Seu perfil não tem permissão para registrar observações."
+          : status === 401
+            ? "Sua sessão expirou. Faça login novamente."
+            : err?.response?.data?.detail ||
+                "Não foi possível registrar a observação no servidor. Tente novamente."
       );
     }
   };
@@ -60,17 +65,17 @@ export default function NovoRegistroPage() {
             Autenticação Necessária
           </h2>
           <p className="text-xs text-space-text-muted">
-            Você precisa estar autenticado com sua credencial Strapi para submeter registros astronômicos.
+            Você precisa estar autenticado para submeter registros astronômicos. Para ter acesso, solicite a um administrador.
           </p>
           <div className="flex gap-3 justify-center pt-2">
-            <Link href="/auth/login">
+            <Link href="/login">
               <Button variant="primary" size="sm">
                 Fazer Login
               </Button>
             </Link>
-            <Link href="/auth/cadastro">
+            <Link href="/contato">
               <Button variant="outline" size="sm">
-                Criar Conta
+                Solicitar Acesso
               </Button>
             </Link>
           </div>

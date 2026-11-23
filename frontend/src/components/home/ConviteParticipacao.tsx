@@ -101,11 +101,11 @@ export function ConviteParticipacao() {
             </Link>
             <span className="text-space-border">•</span>
             <Link
-              href="/auth/cadastro"
+              href="/contato"
               className="flex items-center gap-1.5 hover:text-nebula-cyan transition-colors"
             >
               <Sparkles className="h-3.5 w-3.5 text-stellar-amber" />
-              Cadastrar-se como Astrônomo Colaborador
+              Solicitar acesso como Astrônomo Colaborador
             </Link>
           </div>
         </motion.div>

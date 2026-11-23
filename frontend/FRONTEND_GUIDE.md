@@ -13,7 +13,7 @@
 | **Seções da Home Page** | `src/components/home/` | Componentes que formam a Home: `HeroStatusCockpit`, `OQueObservarHojeHumanizado`, etc. |
 | **Componentes Atômicos de UI** | `src/components/ui/` | Botões (`Button`), Cartões (`Card`), Tags (`Badge`), Abas (`Tabs`), Modais (`Modal`). |
 | **Chamadas para a FastAPI** | `src/features/sky-today/services/` | `fastapiAstroService.ts` — Requisições HTTP para a API de cálculo astronômico. |
-| **Chamadas para o Strapi CMS** | `src/features/content/services/` | `strapiContentService.ts` — Requisições para o painel de artigos e notícias. |
+| **Chamadas para o CMS (Payload)** | `src/features/content/services/` | `cmsContentService.ts` — Requisições para as notícias/artigos. Eventos e página inicial são lidos no servidor com `src/lib/cms/server.ts`. |
 | **Hooks com Cache de Dados** | `src/features/*/hooks/` | Hooks TanStack Query como `useSkyToday()` e `useArticles()`. |
 | **Configurações e URLs** | `src/lib/constants.ts` | Endereços padrão do backend e coordenadas de Fortaleza. |
 | **Cores, Fontes e Efeitos** | `src/styles/globals.css` | Definição das variáveis CSS: `--space-background`, `--nebula-cyan`, etc. |
@@ -45,8 +45,8 @@
 Você **NUNCA** deve alterar URLs diretamente dentro dos componentes. A configuração é centralizada em 2 lugares:
 1. **Ambiente Local/Produção:** no arquivo `.env.local` na raiz de `frontend/`:
    ```env
-   NEXT_PUBLIC_FASTAPI_URL=https://api.observatorio.instituicao.ce
-   NEXT_PUBLIC_STRAPI_URL=https://cms.observatorio.instituicao.ce
+   NEXT_PUBLIC_API_URL=https://observatorio-otto-api.vercel.app
+   NEXT_PUBLIC_CMS_URL=https://observatorio-otto-cms.vercel.app
    ```
 2. **Fallback Padrão:** no arquivo `src/lib/constants.ts` (caso a variável de ambiente não esteja definida).
 
@@ -126,6 +126,6 @@ Imagine que a equipe queira criar uma página de **Previsão do Tempo Noturno** 
 
 * **Nomes de Componentes:** Sempre em `PascalCase` (ex: `HeroStatusCockpit`, `GuiaPorEquipamento`).
 * **Nomes de Hooks:** Sempre com o prefixo `use` (ex: `useSkyToday`, `useArticles`).
-* **Nomes de Serviços:** Sempre terminados em `Service` (ex: `fastapiAstroService`, `strapiContentService`).
+* **Nomes de Serviços:** Sempre terminados em `Service` (ex: `fastapiAstroService`, `cmsContentService`).
 * **Estilização:** Preferir classes do Tailwind aos invés de blocos `<style>` inline.
 * **Acessibilidade:** Botões e links interativos devem ter área de clique confortável (mínimo `40px` a `44px`) e contraste legível conforme as diretrizes do projeto.

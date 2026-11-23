@@ -77,7 +77,7 @@ export function ArtigosStripeBlog() {
           {/* Ensaio de Capa em Destaque (7 colunas) */}
           <div className="lg:col-span-7">
             <Link
-              href={`/conteudo/${artigoPrincipal.slug}`}
+              href="/conteudo"
               className="group block space-y-6"
             >
               <div className="relative aspect-[16/10] w-full rounded-2xl overflow-hidden bg-space-surface-2 border border-white/[0.08]">
@@ -126,7 +126,7 @@ export function ArtigosStripeBlog() {
             {artigosSecundarios.map((artigo, idx) => (
               <div key={artigo.id} className={idx > 0 ? "pt-8" : ""}>
                 <Link
-                  href={`/conteudo/${artigo.slug}`}
+                  href="/conteudo"
                   className="group block space-y-3"
                 >
                   <div className="flex items-center justify-between font-mono text-[11px] text-space-text-muted">
