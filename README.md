@@ -193,7 +193,7 @@ alterar coleção/global → gerar migração → testar local → Pull Request 
 4. **Abra um Pull Request** incluindo a migração. Nunca edite uma migração que já foi para a `main`: crie outra.
 5. **Merge na `main`** → a Vercel faz o deploy. O *Build Command* `npm run ci` executa `payload migrate && next build`: as migrações pendentes rodam no Neon antes do build.
 
-> ⚠️ Os *Preview Deployments* também rodam `payload migrate` no banco apontado pela `DATABASE_URL` do ambiente Preview. Se o Preview usar o mesmo banco da produção, uma migração de PR é aplicada **antes** do merge. Configure um branch do Neon separado para Preview (a integração Neon oferece isso) ou desative o Preview deployment do CMS.
+> ⚠️ O projeto do CMS na Vercel **não gera Preview Deployments**: o *Ignored Build Step* (`[ "$VERCEL_ENV" != "production" ]`) cancela qualquer build que não seja de produção, e o Neon e o Blob estão conectados só ao ambiente Production. Motivo: um Preview rodaria `payload migrate` no mesmo banco da produção, aplicando a migração de um PR **antes** do merge. Valide migrações localmente (passo 3) antes de abrir o PR.
 
 Edições de **conteúdo** (textos, imagens, publicação) são feitas no `/admin` e não passam por PR.
 
@@ -223,6 +223,13 @@ Passos no painel/CLI da Vercel:
 
 - A função **não pode baixar nem gravar arquivos**: por isso `data/de421.bsp` é versionado e o Skyfield só o lê.
 - Para regenerar o arquivo (raro): baixe `https://ssd.jpl.nasa.gov/ftp/eph/planets/bsp/de421.bsp` para `api_python/data/`.
+
+---
+
+## Pendências
+
+- [ ] **Voltar a Production Branch para `main`.** Nos **dois** projetos da Vercel (`observatorio-otto-cms` e `observatorio-otto-api`) a *Production Branch* está temporariamente em **`payload-cms`**, para que o primeiro deploy use as variáveis e o banco de produção antes do merge. Depois do merge do PR: *Settings → Environments → Production → Branch Tracking* (ou *Settings → Git → Production Branch*) → `main`, e confira que o deploy seguinte, a partir da `main`, passa.
+- [ ] Definir `ALLOWED_ORIGINS` da API com a URL real do frontend (hoje é provisório) e confirmar `CMS_URL` com o domínio final do CMS.
 
 ---
 
