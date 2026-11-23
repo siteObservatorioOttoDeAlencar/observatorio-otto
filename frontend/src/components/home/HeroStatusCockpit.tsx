@@ -29,7 +29,9 @@ export function HeroStatusCockpit() {
   // Tratamento de valores padrão caso a requisição ainda esteja carregando
   const planetasCount = data?.planetas_visiveis_agora?.length ?? 3;
   const faseNome = data?.fase_lua_nome || "Crescente";
-  const ilumPercentual = calcularIluminacaoLunar(data?.fase_lua_graus ?? 115);
+  const ilumPercentual = data?.lua?.iluminacao_percentual ?? calcularIluminacaoLunar(data?.fase_lua_graus ?? 115);
+  // De dia (RN001) a API não lista planetas e explica quando eles aparecem (MSG020)
+  const ehDia = data?.periodo === "dia";
 
   return (
     <section className="relative overflow-hidden border-b border-white/[0.08] pt-6 sm:pt-10 pb-12 sm:pb-16 bg-space-background">
@@ -49,7 +51,9 @@ export function HeroStatusCockpit() {
             <span className="font-semibold uppercase tracking-wider text-lunar-silver">
               Céu em Fortaleza Agora:
             </span>
-            <span className="text-aurora-green font-medium">Condições Favoráveis para Observação</span>
+            <span className="text-aurora-green font-medium">
+              {ehDia ? "Os planetas aparecem depois do pôr do Sol" : "Condições Favoráveis para Observação"}
+            </span>
           </div>
 
           <div className="text-space-text-muted flex items-center gap-2">
@@ -62,12 +66,14 @@ export function HeroStatusCockpit() {
         {/* Resposta Principal aos 5 Segundos */}
         <div className="max-w-3xl mb-8 sm:mb-10 space-y-4">
           <h1 className="font-display text-3xl sm:text-5xl md:text-6xl font-black tracking-tight text-space-text leading-[1.08] text-balance">
-            Vale a pena olhar para o céu esta noite.
+            {ehDia ? "O céu desta noite começa depois do pôr do Sol." : "Vale a pena olhar para o céu esta noite."}
           </h1>
           <p className="text-sm sm:text-base md:text-lg text-space-text-muted leading-relaxed max-w-2xl text-balance">
             {isLoading
               ? "Calculando os astros visíveis no horizonte cearense..."
-              : `Temos ${planetasCount} planetas visíveis a olho nu e a Lua em fase ${faseNome} (${ilumPercentual}% iluminada). A melhor janela para observar é das 19h30 às 22h00.`}
+              : ehDia && data?.mensagem
+                ? `${data.mensagem} A Lua está em fase ${faseNome} (${ilumPercentual}% iluminada).`
+                : `Temos ${planetasCount} planetas visíveis a olho nu e a Lua em fase ${faseNome} (${ilumPercentual}% iluminada). A melhor janela para observar é das 19h30 às 22h00.`}
           </p>
         </div>
 

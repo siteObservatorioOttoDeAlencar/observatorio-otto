@@ -5,6 +5,7 @@ import { Compass, Moon, Orbit, Telescope, Eye, Clock, MapPin, Sparkles, AlertCir
 import { useSkyToday } from "@/features/sky-today/hooks/useSkyToday";
 import { SkyDomeRadar } from "@/features/sky-today/components/SkyDomeRadar";
 import { SkyCardGrid } from "@/features/sky-today/components/SkyCardGrid";
+import { SolELuaHoje } from "@/features/sky-today/components/SolELuaHoje";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -13,10 +14,10 @@ import { calcularIluminacaoLunar } from "@/lib/utils/astronomy";
 export default function CeuHojePage() {
   const { data, isLoading, isError, refetch, isFetching } = useSkyToday();
 
-  // Dados calculados de iluminação lunar compartilhados
+  // Iluminação lunar: valor calculado pela API; a fórmula local só cobre a resposta de reserva
   const moonIllumination = React.useMemo(() => {
-    return calcularIluminacaoLunar(data?.fase_lua_graus);
-  }, [data?.fase_lua_graus]);
+    return data?.lua?.iluminacao_percentual ?? calcularIluminacaoLunar(data?.fase_lua_graus);
+  }, [data?.lua?.iluminacao_percentual, data?.fase_lua_graus]);
 
   return (
     <div className="py-6 sm:py-8 md:py-10 space-y-8">
@@ -86,6 +87,17 @@ export default function CeuHojePage() {
 
       {data && (
         <>
+          {/* MSG020: de dia nenhum planeta é listado e a API explica quando eles aparecem */}
+          {data.periodo === "dia" && data.mensagem && (
+            <div
+              role="status"
+              className="flex items-start gap-2.5 rounded-xl border border-stellar-amber/30 bg-stellar-amber/10 p-4 text-sm text-lunar-silver"
+            >
+              <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-stellar-amber" />
+              <span>{data.mensagem}</span>
+            </div>
+          )}
+
           {/* Métricas Principais da Noite */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
             <div className="cosmic-glass rounded-xl p-4 border border-space-border/80">
@@ -118,9 +130,13 @@ export default function CeuHojePage() {
               </span>
               <div className="flex items-baseline gap-2">
                 <span className="font-mono text-sm sm:text-base font-medium text-lunar-silver">
-                  {new Date(data.data_hora_utc).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })} UTC
+                  {new Date(data.calculado_em ?? data.data_hora_utc).toLocaleTimeString("pt-BR", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    timeZone: "America/Fortaleza",
+                  })}
                 </span>
-                <span className="text-[10px] text-space-text-muted">(Fortaleza)</span>
+                <span className="text-[10px] text-space-text-muted">(horário de Fortaleza)</span>
               </div>
             </div>
 
@@ -205,6 +221,8 @@ export default function CeuHojePage() {
                     </span>
                   </div>
                 </div>
+
+                <SolELuaHoje data={data} />
               </div>
 
               {/* Guia Rápido de Instrumentação */}
@@ -261,7 +279,9 @@ export default function CeuHojePage() {
               <div className="rounded-2xl cosmic-glass border border-space-border/80 p-8 text-center">
                 <Orbit className="mx-auto h-8 w-8 text-space-text-muted mb-2" />
                 <p className="text-sm text-space-text-muted">
-                  Nenhum dos planetas principais está acima do horizonte neste exato instante.
+                  {data.periodo === "dia" && data.mensagem
+                    ? data.mensagem
+                    : "Nenhum dos planetas principais está acima do horizonte neste exato instante."}
                 </p>
               </div>
             )}

@@ -5,3 +5,4 @@ sqlalchemy==2.0.35
 psycopg2-binary==2.9.13
 skyfield==1.49
 python-dotenv==1.0.1
+tzdata

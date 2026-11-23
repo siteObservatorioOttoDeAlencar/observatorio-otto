@@ -24,6 +24,9 @@ def ambiente(monkeypatch):
 
 def _cliente(monkeypatch, handler) -> TestClient:
     """Cria o app e troca o httpx.AsyncClient usado em auth.py por um com transporte falso."""
+    # Os testes não podem depender de um api_python/.env local: sem isto o reload recarregaria o arquivo
+    monkeypatch.setattr("dotenv.load_dotenv", lambda *args, **kwargs: False)
+
     import main
 
     importlib.reload(main)  # relê ALLOWED_ORIGINS

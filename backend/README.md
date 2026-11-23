@@ -22,7 +22,13 @@ O CMS **não** roda no Docker: ele usa `npm run dev` e o Postgres do Compose.
 ## Endpoints da API FastAPI
 
 - `GET /health`: verifica se a API está respondendo.
-- `GET /observar-hoje`: planetas visíveis, direção cardeal, dificuldade, fase atual da Lua (nome e ângulo) e resumo das condições de observação para a localização configurada. Lê as efemérides de `api_python/data/de421.bsp` (sem rede). Se houver falha no cálculo, responde em modo degradado (`"status": "degraded"`).
+- `GET /observar-hoje[?data_hora=<ISO 8601>]`: o que observar no céu de Fortaleza (fuso `America/Fortaleza`, UTC-3). Lê as efemérides de `api_python/data/de421.bsp` (sem rede e sem gravar em disco).
+  - **Planetas (RN001):** só aparecem se estiverem a mais de 0° do horizonte **e** com o Sol abaixo de -6°. De dia a lista vem vazia e `mensagem` traz "Ainda é dia em Fortaleza. Os planetas começam a aparecer depois do pôr do Sol, às HH:MM.". Cada planeta traz `direcao_cardeal` (RN003: Norte, Nordeste, Leste…), `altura` (RN004: "perto do horizonte", "a meia altura", "alto no céu", "quase acima da cabeça") e também `altitude_graus` e `azimute_graus`.
+  - **Lua (RN002):** `lua.fase_nome` (Nova, Crescente, Quarto crescente, Crescente gibosa, Cheia, Minguante gibosa, Quarto minguante, Minguante), `iluminacao_percentual`, `proxima_lua_cheia` e `proxima_lua_nova`. `fase_lua_nome` e `fase_lua_graus` continuam no topo da resposta.
+  - **Sol e Lua do dia (US034):** `sol` e `lua` trazem `nascer` e `por` em `HH:MM` no fuso de Fortaleza; quando a Lua não nasce ou não se põe no dia, o campo traz o aviso ("A Lua não nasce neste dia.") e `nascer_iso`/`por_iso` ficam `null`.
+  - **Data e hora (US035):** `data_hora` opcional (ISO 8601; sem fuso = horário de Fortaleza; use `%2B` no lugar de `+` na URL). Aceita até 1 ano antes ou depois de hoje; fora disso responde **422**. A resposta informa o momento calculado em `calculado_em`.
+  - **Cache:** sem `data_hora`, a resposta leva `Cache-Control: public, s-maxage=300` (poupa a cota gratuita da Vercel).
+  - Se o cálculo falhar (ex.: efemérides ausentes), responde **503**.
 - `POST /registros-observacao`: rota protegida. Exige `Authorization` válido no CMS e perfil `observacao`, `coordenador` ou `administrador` (sem login → 401; outro perfil → 403). A gravação do registro ainda não está implementada.
 
 O conteúdo editorial (início, eventos, notícias) **não** passa pela FastAPI: o site lê direto do CMS em `/api/<coleção>` e `/api/globals/<global>`.

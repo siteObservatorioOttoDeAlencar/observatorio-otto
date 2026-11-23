@@ -54,7 +54,14 @@ Definidas em `cms/src/access/perfis.ts`:
 ### Endpoints
 
 - **`GET /health`** — `{"status": "ok"}`.
-- **`GET /observar-hoje`** — planetas acima do horizonte (Mercúrio, Vênus, Marte, Júpiter e Saturno) com altitude, azimute, direção cardeal, visibilidade a olho nu, dificuldade e equipamento sugerido, fase da Lua (nome e ângulo) e resumo das condições. Em caso de falha no cálculo, devolve uma resposta degradada em vez de erro 500.
+- **`GET /observar-hoje[?data_hora=<ISO 8601>]`** — o que observar no céu de Fortaleza, calculado com Skyfield e `America/Fortaleza` (UTC-3, sem horário de verão). Regras implementadas em `astronomia.py`:
+  - **RN001** — um planeta (Mercúrio, Vênus, Marte, Júpiter, Saturno) só é visível com altitude > 0° e Sol abaixo de -6°. De dia, nenhum planeta é listado e a resposta traz a MSG020 com a hora do pôr do Sol local. No crepúsculo (Sol entre 0° e -6°) a lista também fica vazia.
+  - **RN002** — fase da Lua pelo ângulo de fase do Skyfield, em 8 faixas de 45° centradas (Nova, Crescente, Quarto crescente, Crescente gibosa, Cheia, Minguante gibosa, Quarto minguante, Minguante), com porcentagem iluminada e datas da próxima Lua cheia e da próxima Lua nova.
+  - **RN003** — direção por azimute em 8 setores de 45° centrados. **RN004** — altura descrita em linguagem humana (< 15° perto do horizonte; 15–45° a meia altura; 45–75° alto no céu; > 75° quase acima da cabeça), mantendo altitude e azimute em graus.
+  - **US034** — nascer e pôr do Sol e da Lua do dia em `HH:MM` (Fortaleza); se a Lua não nascer ou não se puser no dia, o campo traz o aviso em vez de ficar vazio.
+  - **US035** — `data_hora` opcional, até 1 ano antes ou depois de hoje (fora disso, 422). A resposta traz `calculado_em` no fuso de Fortaleza.
+  - Sem `data_hora`, a resposta vem com `Cache-Control: public, s-maxage=300`. Falha no cálculo → 503.
+  - Mantém os campos auxiliares de dificuldade, equipamento sugerido e visibilidade a olho nu por planeta.
 - **`POST /registros-observacao`** — exige login e perfil `observacao`, `coordenador` ou `administrador`. Hoje é só um esqueleto (devolve `usuario_id` e `perfil`).
 
 ### Autenticação
@@ -70,7 +77,8 @@ O arquivo `data/de421.bsp` (JPL/NASA, ~17 MB) é versionado e carregado por `sky
 - CORS por `ALLOWED_ORIGINS` (lista separada por vírgulas; vazia = nenhuma origem).
 - Variáveis: `CMS_URL`, `DATABASE_URL`, `ALLOWED_ORIGINS` (e `OBSERVATORIO_LAT`/`OBSERVATORIO_LON`, opcionais).
 - `database.py` prepara a conexão SQLAlchemy (aceita URLs `postgres://` do Neon); ainda não é usado por nenhuma rota.
-- Testes (`pytest`) cobrem 401, 403, 200, 502, 503, CORS e a leitura das efemérides.
+- Dependências: inclui `tzdata`, necessário para o fuso `America/Fortaleza` no runtime da Vercel.
+- Testes (`pytest`) cobrem 401, 403, 200, 502, 503, CORS, as regras RN001–RN004, US034 e US035 (inclusive fases reais de 2026 conferidas com eclipses catalogados pela NASA) e a leitura das efemérides.
 
 ## PostgreSQL
 
